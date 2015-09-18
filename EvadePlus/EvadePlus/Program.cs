@@ -23,14 +23,6 @@ namespace EvadePlus
                 Evade = new EvadePlus(Detector);
                 EvadeMenu.CreateMenu();
             };
-
-            Drawing.OnDraw += delegate
-            {
-                foreach (var tower in ObjectManager.Get<Obj_AI_Turret>().Where(t => t.IsEnemy && !t.IsDead && t.Distance(Player.Instance, true) < 1200.Pow()))
-                {
-                    Drawing.DrawCircle(tower.Position, 800 + Player.Instance.BoundingRadius, Color.Red);
-                }
-            };
         }
     }
 }
