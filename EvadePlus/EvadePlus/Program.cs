@@ -14,9 +14,6 @@ namespace EvadePlus
 
         private static void Main(string[] args)
         {
-            Hacks.AntiAFK = true;
-            Bootstrap.Init(null);
-
             Loading.OnLoadingComplete += delegate
             {
                 Detector = new SkillshotDetector(DetectionTeam.EnemyTeam);
