@@ -162,7 +162,7 @@ namespace EvadePlus
                 c.OnDeleteObject(sender);
         }
 
-        private void OnStopCast(Spellbook sender, SpellbookStopCastEventArgs args)
+        private void OnStopCast(Obj_AI_Base sender, SpellbookStopCastEventArgs args)
         {
             if (sender == null)
             {
@@ -174,7 +174,7 @@ namespace EvadePlus
                 foreach (
                     var c in
                         DetectedSkillshots.Where(
-                            v => v.SpawnObject == null && v.Caster != null && v.Caster.Index == sender.Owner.Index))
+                            v => v.SpawnObject == null && v.Caster != null && v.Caster.IsMe))
                 {
                     c.IsValid = false;
                 }
