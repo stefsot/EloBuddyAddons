@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using EloBuddy;
+using EloBuddy.SDK;
 using SharpDX;
 
 namespace EvadePlus
@@ -174,7 +175,7 @@ namespace EvadePlus
                 foreach (
                     var c in
                         DetectedSkillshots.Where(
-                            v => v.SpawnObject == null && v.Caster != null && v.Caster.IsMe))
+                            v => v.SpawnObject == null && v.Caster != null && v.Caster.IdEquals(sender)))
                 {
                     c.IsValid = false;
                 }
