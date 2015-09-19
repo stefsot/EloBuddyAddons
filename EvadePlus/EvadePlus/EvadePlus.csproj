@@ -34,15 +34,14 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="EloBuddy, Version=1.0.0.0, Culture=neutral, PublicKeyToken=7339047cb10f6e86, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Dependencies\EloBuddy.dll</HintPath>
+    <Reference Include="EloBuddy">
+      <HintPath>..\..\Dependencies\EloBuddy.dll</HintPath>
     </Reference>
     <Reference Include="EloBuddy.SDK">
-      <HintPath>..\Dependencies\EloBuddy.SDK.dll</HintPath>
+      <HintPath>..\..\Dependencies\EloBuddy.SDK.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX">
-      <HintPath>..\Dependencies\SharpDX.dll</HintPath>
+      <HintPath>..\..\Dependencies\SharpDX.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
