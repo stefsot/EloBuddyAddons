@@ -91,7 +91,7 @@ namespace ezEvade
 
         private void Game_OnGameLoad(EventArgs args)
         {
-            Console.Write("ezEvade loading....");
+            //Console.Write("ezEvade loading....");
 
             try
             {
@@ -203,11 +203,11 @@ namespace ezEvade
 
                 //evadeTester = new EvadeTester(menu);
 
-                Console.WriteLine("ezEvade Loaded");
+                //Console.WriteLine("ezEvade Loaded");
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                //Console.WriteLine(e);
             }
         }
 
@@ -623,7 +623,7 @@ namespace ezEvade
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                //Console.WriteLine(e);
             }
         }
 
@@ -700,7 +700,7 @@ namespace ezEvade
             {
                 Spell spell = entry.Value;
 
-                if (lastPosInfo != null) //&& lastPosInfo.dodgeableSpells.Contains(spell.spellID)
+                if (lastPosInfo != null) //&& lastPosInfo.dodgeableSpells.Contains(spell.spellID))
                 {
                     if (myHero.ServerPosition.To2D().InSkillShot(spell, ObjectCache.myHeroCache.boundingRadius))
                     {

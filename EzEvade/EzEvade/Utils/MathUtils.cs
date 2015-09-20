@@ -240,7 +240,7 @@ namespace ezEvade
 
             return float.MaxValue;
         }
-
+        
         //http://csharphelper.com/blog/2014/09/determine-where-a-line-intersects-a-circle-in-c/
         // Find the points of intersection.
         public static int FindLineCircleIntersections(
