@@ -522,7 +522,7 @@ namespace ezEvade
                 foreach (var obj in ObjectManager.Get<Obj_AI_Base>()
                     .Where(h => !h.IsMe && h.IsValidTarget(spell.range)))
                 {
-                    if (!obj.IsValid() && (obj as Obj_AI_Turret) != null)
+                    if (obj.GetType() == typeof(Obj_AI_Turret) && ((Obj_AI_Turret)obj).IsValid())
                     {
                         collisionCandidates.Add(obj);
                     }

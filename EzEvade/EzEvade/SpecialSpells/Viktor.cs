@@ -27,7 +27,7 @@ namespace ezEvade.SpecialSpells
 
         private static void OnCreateObj_ViktorDeathRay3(GameObject obj, EventArgs args)
         {
-            if ((obj as MissileClient) == null || !(obj as MissileClient).IsValidMissile())
+            if (obj.GetType() != typeof(MissileClient) || !((MissileClient) obj).IsValidMissile())
                 return;
 
             MissileClient missile = (MissileClient)obj;

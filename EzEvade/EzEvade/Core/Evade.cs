@@ -496,7 +496,7 @@ namespace ezEvade
                     if (args.Order == GameObjectOrder.AttackUnit)
                     {
                         var target = args.Target;
-                        if (target != null && (target as Obj_AI_Base) != null && (target as Obj_AI_Base).IsValid())
+                        if (target != null && target.GetType() == typeof(Obj_AI_Base) && ((Obj_AI_Base) target).IsValid())
                         {
                             var baseTarget = target as Obj_AI_Base;
                             if (ObjectCache.myHeroCache.serverPos2D.Distance(baseTarget.ServerPosition.To2D()) >

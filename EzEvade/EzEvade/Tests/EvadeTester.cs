@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -263,24 +264,24 @@ namespace ezEvade
 
             ConsolePrinter.Print(sender.Type + " : " + sender.Name);*/
 
-            if ((obj as MissileClient) != null)
-            {
-                MissileClient autoattack = (MissileClient)obj;
+            //if ((obj as MissileClient) != null)
+            //{
+            //    MissileClient autoattack = (MissileClient)obj;
 
-                /*if (!autoattack.SpellCaster.IsMinion)
-                {
-                    ConsolePrinter.Print("Missile Name " + autoattack.SData.Name);
-                    ConsolePrinter.Print("Missile Speed " + autoattack.SData.MissileSpeed);
-                    ConsolePrinter.Print("LineWidth " + autoattack.SData.LineWidth);
-                    ConsolePrinter.Print("Range " + autoattack.SData.CastRange);
-                    ConsolePrinter.Print("Accel " + autoattack.SData.MissileAccel);
-                }*/
-            }
+            //    /*if (!autoattack.SpellCaster.IsMinion)
+            //    {
+            //        ConsolePrinter.Print("Missile Name " + autoattack.SData.Name);
+            //        ConsolePrinter.Print("Missile Speed " + autoattack.SData.MissileSpeed);
+            //        ConsolePrinter.Print("LineWidth " + autoattack.SData.LineWidth);
+            //        ConsolePrinter.Print("Range " + autoattack.SData.CastRange);
+            //        ConsolePrinter.Print("Accel " + autoattack.SData.MissileAccel);
+            //    }*/
+            //}
 
 
             //ConsolePrinter.Print(obj.Name + ": " + obj.Type);
 
-            if ((obj as MissileClient) == null)
+            if (obj.GetType() != typeof(MissileClient))
                 return;
 
             if (testMenu.Get<CheckBox>("ShowMissileInfo").CurrentValue)
@@ -291,9 +292,9 @@ namespace ezEvade
 
             MissileClient missile = (MissileClient)obj;
 
-            if (!missile.SpellCaster.IsValid() || (missile.SpellCaster as AIHeroClient) == null)
+            if (missile.SpellCaster.GetType() != typeof(AIHeroClient) || ((AIHeroClient)missile.SpellCaster).IsValid())
             {
-                //return;
+                return;
             }
 
 

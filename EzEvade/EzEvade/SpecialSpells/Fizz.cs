@@ -48,7 +48,7 @@ namespace ezEvade.SpecialSpells
         {
             //need to track where bait is attached to
 
-            if ((obj as MissileClient) == null || !(obj as MissileClient).IsValidMissile())
+            if (obj.GetType() != typeof(MissileClient) || !((MissileClient) obj).IsValidMissile())
                 return;
 
             MissileClient missile = (MissileClient)obj;
@@ -63,7 +63,7 @@ namespace ezEvade.SpecialSpells
 
         private static void OnCreateObj_FizzMarinerDoom(GameObject obj, EventArgs args, SpellData spellData)
         {
-            if ((obj as MissileClient) == null || !(obj as MissileClient).IsValidMissile())
+            if (obj.GetType() != typeof(MissileClient) || !((MissileClient) obj).IsValidMissile())
                 return;
 
             MissileClient missile = (MissileClient)obj;

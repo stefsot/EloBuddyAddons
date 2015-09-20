@@ -79,10 +79,10 @@ namespace ezEvade
                 
         private void SpellMissile_OnCreate(GameObject obj, EventArgs args)
         {
-            if ((obj as MissileClient) == null || !(obj as MissileClient).IsValidMissile())
+            if (obj.GetType() != typeof(MissileClient) || !((MissileClient)obj).IsValidMissile())
                 return;
 
-            MissileClient missile = (MissileClient)obj;
+            MissileClient missile = (MissileClient) obj;
 
             SpellData spellData;
 
@@ -154,7 +154,7 @@ namespace ezEvade
 
         private void SpellMissile_OnDelete(GameObject obj, EventArgs args)
         {
-            if ((obj as MissileClient) == null || !(obj as MissileClient).IsValidMissile())
+            if (obj.GetType() != typeof(MissileClient) || !((MissileClient) obj).IsValidMissile())
                 return;
 
             MissileClient missile = (MissileClient)obj;
@@ -172,7 +172,7 @@ namespace ezEvade
         private void SpellMissile_OnCreateOld(GameObject obj, EventArgs args)
         {
 
-            if ((obj as MissileClient) == null || !(obj as MissileClient).IsValidMissile())
+            if (obj.GetType() != typeof(MissileClient) || !((MissileClient) obj).IsValidMissile())
                 return;
 
             Obj_SpellMissile missile = (Obj_SpellMissile)obj;
@@ -226,7 +226,7 @@ namespace ezEvade
 
         private void SpellMissile_OnDeleteOld(GameObject obj, EventArgs args)
         {
-            if ((obj as MissileClient) == null || !(obj as MissileClient).IsValidMissile())
+            if (obj.GetType() != typeof(MissileClient) || !((MissileClient) obj).IsValidMissile())
                 return;
 
             Obj_SpellMissile missile = (Obj_SpellMissile)obj;
