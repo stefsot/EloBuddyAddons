@@ -79,12 +79,12 @@ namespace ezEvade.SpecialSpells
                             Vector3 endPos2;
                             if (info.usePosition == false)
                             {
-                                endPos2 = info.obj.Position.Extend(args.End, spellData.range);
+                                endPos2 = info.obj.Position.Extend(args.End, spellData.range).To3DWorld();
                                 SpellDetector.CreateSpellData(hero, info.obj.Position, endPos2, spellData, null, 0, false);
                             }
                             else
                             {
-                                endPos2 = info.position.Extend(args.End, spellData.range);
+                                endPos2 = info.position.Extend(args.End, spellData.range).To3DWorld();
                                 SpellDetector.CreateSpellData(hero, info.position, endPos2, spellData, null, 0, false);
                             }
 
@@ -96,7 +96,7 @@ namespace ezEvade.SpecialSpells
 
         private static void SpellMissile_ZedShadowDash(GameObject obj, EventArgs args)
         {
-            if (!obj.IsValid<MissileClient>())
+            if ((obj as MissileClient) == null || !(obj as MissileClient).IsValidMissile())
                 return;
 
             MissileClient missile = (MissileClient)obj;

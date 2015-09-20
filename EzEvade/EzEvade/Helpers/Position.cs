@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using EloBuddy;
 using EloBuddy.SDK;
+using EloBuddy.SDK.Menu.Values;
 using SharpDX;
 
 namespace ezEvade
@@ -97,7 +98,7 @@ namespace ezEvade
                 var turret = entry.Value;
                 if (turret == null || !turret.IsValid || turret.IsDead)
                 {
-                    Utility.DelayAction.Add(1, () => ObjectCache.turrets.Remove(entry.Key));
+                    Core.DelayAction(() => ObjectCache.turrets.Remove(entry.Key), 1);
                     continue;
                 }
 
@@ -153,9 +154,9 @@ namespace ezEvade
         {
             float posValue = pos.Distance(Game.CursorPos.To2D());
 
-            if (ObjectCache.menuCache.cache["PreventDodgingNearEnemy"].GetValue<bool>())
+            if (ObjectCache.menuCache.cache["PreventDodgingNearEnemy"].Cast<CheckBox>().CurrentValue)
             {
-                var minComfortDistance = ObjectCache.menuCache.cache["MinComfortZone"].GetValue<Slider>().Value;
+                var minComfortDistance = ObjectCache.menuCache.cache["MinComfortZone"].Cast<Slider>().CurrentValue;
                 var distanceToChampions = pos.GetDistanceToChampions();
 
                 if (minComfortDistance > distanceToChampions)
@@ -164,7 +165,7 @@ namespace ezEvade
                 }
             }
 
-            if (ObjectCache.menuCache.cache["PreventDodgingUnderTower"].GetValue<bool>())
+            if (ObjectCache.menuCache.cache["PreventDodgingUnderTower"].Cast<CheckBox>().CurrentValue)
             {
                 var turretRange = 875 + ObjectCache.myHeroCache.boundingRadius;
                 var distanceToTurrets = pos.GetDistanceToTurrets();

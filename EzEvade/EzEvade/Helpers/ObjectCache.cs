@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 using EloBuddy;
 using EloBuddy.SDK;
+using EloBuddy.SDK.Menu;
+using EloBuddy.SDK.Menu.Values;
 using SharpDX;
 
 namespace ezEvade
@@ -34,7 +36,7 @@ namespace ezEvade
 
         public void UpdateInfo()
         {
-            var extraDelayBuffer = ObjectCache.menuCache.cache["ExtraPingBuffer"].GetValue<Slider>().Value;
+            var extraDelayBuffer = 30; //ObjectCache.menuCache.cache["ExtraPingBuffer"].Cast<Slider>().CurrentValue;
 
             serverPos2D = hero.ServerPosition.To2D(); //CalculatedPosition.GetPosition(hero, Game.Ping);
             serverPos2DExtra = EvadeUtils.GetGamePosition(hero, Game.Ping + extraDelayBuffer);
@@ -47,10 +49,39 @@ namespace ezEvade
         }
     }
 
+    public class CacheDictionary 
+    {
+        private List<Menu> list = new List<Menu>();
+
+        public void Add(Menu value)
+        {
+            list.Add(value);
+        }
+
+        public ValueBase this[string item]
+        {
+            get
+            {
+                foreach (var menu in list)
+                {
+                    var control = menu[item];
+
+                    if (control != null)
+                    {
+                        return control;
+                    }
+                }
+
+                Console.WriteLine("------------> " + item);
+                return null;
+            }
+        }
+    }
+
     public class MenuCache
     {
         public Menu menu;
-        public Dictionary<string, MenuItem> cache = new Dictionary<string, MenuItem>();
+        public CacheDictionary cache = new CacheDictionary();
 
         public MenuCache(Menu menu)
         {
@@ -61,33 +92,48 @@ namespace ezEvade
 
         public void AddMenuToCache(Menu newMenu)
         {
-            foreach (var item in ReturnAllItems(newMenu))
+            if (newMenu.IsSubMenu)
             {
-                AddMenuItemToCache(item);
-            }
-        }
-
-        public void AddMenuItemToCache(MenuItem item)
-        {
-            if (item != null && !cache.ContainsKey(item.Name))
-            {
-                cache.Add(item.Name, item);
-            }
-        }
-
-        public static List<MenuItem> ReturnAllItems(Menu menu)
-        {
-            List<MenuItem> menuList = new List<MenuItem>();
-
-            menuList.AddRange(menu.Items);
-
-            foreach (var submenu in menu.Children)
-            {
-                menuList.AddRange(ReturnAllItems(submenu));
+                cache.Add(newMenu);
             }
 
-            return menuList;
+            //foreach (var submenu in newMenu.SubMenus)
+            //{
+            //    cache.Add(submenu);
+
+            //    AddMenuToCache(submenu);
+            //}
         }
+
+        //public void AddMenuToCache(Menu newMenu)
+        //{
+        //    foreach (var item in ReturnAllItems(newMenu))
+        //    {
+        //        AddMenuItemToCache(item);
+        //    }
+        //}
+
+        //public void AddMenuItemToCache(ValueBase item)
+        //{
+        //    if (item != null && !cache.ContainsKey(item.DisplayName))
+        //    {
+        //        cache.Add(item.SerializationId, item);
+        //    }
+        //}
+
+        //public static List<ValueBase> ReturnAllItems(Menu menu)
+        //{
+        //    List<ValueBase> menuList = new List<ValueBase>();
+
+        //    menuList.AddRange(menu.LinkedValues.Values);
+
+        //    foreach (var submenu in menu.SubMenus)
+        //    {
+        //        menuList.AddRange(ReturnAllItems(submenu));
+        //    }
+
+        //    return menuList;
+        //}
     }
 
     public static class ObjectCache

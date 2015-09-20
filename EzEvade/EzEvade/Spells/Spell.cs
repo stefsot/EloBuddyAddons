@@ -5,6 +5,7 @@ using System.Text;
 
 using EloBuddy;
 using EloBuddy.SDK;
+using EloBuddy.SDK.Menu.Values;
 using SharpDX;
 
 namespace ezEvade
@@ -44,8 +45,8 @@ namespace ezEvade
     {
         public static float GetSpellRadius(this Spell spell)
         {
-            var radius = ObjectCache.menuCache.cache[spell.info.spellName + "SpellRadius"].GetValue<Slider>().Value;
-            var extraRadius = ObjectCache.menuCache.cache["ExtraSpellRadius"].GetValue<Slider>().Value;
+            var radius = ObjectCache.menuCache.cache[spell.info.spellName + "SpellRadius"].Cast<Slider>().CurrentValue;
+            var extraRadius = ObjectCache.menuCache.cache["ExtraSpellRadius"].Cast<Slider>().CurrentValue;
 
             if (spell.info.hasEndExplosion && spell.spellType == SpellType.Circular)
             {
@@ -65,7 +66,7 @@ namespace ezEvade
 
         public static int GetSpellDangerLevel(this Spell spell)
         {
-            var dangerStr = ObjectCache.menuCache.cache[spell.info.spellName + "DangerLevel"].GetValue<StringList>().SelectedValue;
+            var dangerStr = ObjectCache.menuCache.cache[spell.info.spellName + "DangerLevel"].Cast<Slider>().DisplayName;
 
             var dangerlevel = 1;
 
@@ -147,7 +148,7 @@ namespace ezEvade
             if (spell.info.collisionObjects.Contains(CollisionObjectType.EnemyChampions))
             {
                 foreach (var hero in HeroManager.Allies
-                    .Where(h => !h.IsMe && h.IsValidTarget(distanceToHero, false, spellPos.To3D())))
+                    .Where(h => !h.IsMe && h.IsValidTarget(distanceToHero)))
                 {
                     collisionCandidates.Add(hero);
                 }
@@ -156,7 +157,7 @@ namespace ezEvade
             if (spell.info.collisionObjects.Contains(CollisionObjectType.EnemyMinions))
             {
                 foreach (var minion in ObjectManager.Get<Obj_AI_Minion>()
-                    .Where(h => h.Team == Evade.myHero.Team && h.IsValidTarget(distanceToHero, false, spellPos.To3D())))
+                    .Where(h => h.Team == Evade.myHero.Team && h.IsValidTarget()))
                 {
                     if (minion.BaseSkinName.ToLower() == "teemomushroom"
                         || minion.BaseSkinName.ToLower() == "shacobox")

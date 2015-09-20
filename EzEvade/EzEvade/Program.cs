@@ -1,4 +1,6 @@
-﻿using ezEvade;
+﻿using System;
+using ezEvade;
+using EloBuddy.SDK.Menu;
 
 namespace EzEvade
 {

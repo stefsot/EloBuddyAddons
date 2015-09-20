@@ -8,6 +8,7 @@ using Color = System.Drawing.Color;
 
 using EloBuddy;
 using EloBuddy.SDK;
+using EzEvade;
 using SharpDX;
 
 namespace ezEvade.Draw

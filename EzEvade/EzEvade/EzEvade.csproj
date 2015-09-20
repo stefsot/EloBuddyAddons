@@ -35,7 +35,8 @@
     <Reference Include="EloBuddy">
       <HintPath>..\..\Dependencies\EloBuddy.dll</HintPath>
     </Reference>
-    <Reference Include="EloBuddy.SDK">
+    <Reference Include="EloBuddy.SDK, Version=1.0.0.0, Culture=neutral, PublicKeyToken=6b574a82b1ea937e, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Dependencies\EloBuddy.SDK.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX">
@@ -51,6 +52,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Burrito.cs" />
     <Compile Include="Core\Evade.cs" />
     <Compile Include="Core\EvadeHelper.cs" />
     <Compile Include="Draw\RenderCircle.cs" />
@@ -67,8 +69,10 @@
     <Compile Include="Helpers\Position.cs" />
     <Compile Include="Helpers\PositionInfo.cs" />
     <Compile Include="Helpers\Situation.cs" />
+    <Compile Include="Items.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Render.cs" />
     <Compile Include="SpecialSpells\AllChampions.cs" />
     <Compile Include="SpecialSpells\Ashe.cs" />
     <Compile Include="SpecialSpells\ChampionPlugin.cs" />

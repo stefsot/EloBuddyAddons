@@ -8,6 +8,7 @@ using Color = System.Drawing.Color;
 
 using EloBuddy;
 using EloBuddy.SDK;
+using EzEvade;
 using SharpDX;
 
 namespace ezEvade.Draw
@@ -44,7 +45,7 @@ namespace ezEvade.Draw
         {
             if (renderPosition.IsOnScreen())
             {
-                var textDimension = Drawing.GetTextExtent(text);
+                var textDimension = Drawing.GetTextEntent(text, 12);
                 var wardScreenPos = Drawing.WorldToScreen(renderPosition.To3D());
 
                 Drawing.DrawText(wardScreenPos.X - textDimension.Width / 2, wardScreenPos.Y, color, text);

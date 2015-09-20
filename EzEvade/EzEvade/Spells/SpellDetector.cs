@@ -8,6 +8,9 @@ using System.Reflection.Emit;
 
 using EloBuddy;
 using EloBuddy.SDK;
+using EloBuddy.SDK.Menu;
+using EloBuddy.SDK.Menu.Values;
+using EzEvade;
 using SharpDX;
 
 namespace ezEvade
@@ -68,8 +71,7 @@ namespace ezEvade
 
             menu = mainMenu;
 
-            spellMenu = new Menu("Spells", "Spells");
-            menu.AddSubMenu(spellMenu);
+            spellMenu = menu.IsSubMenu ? menu.Parent.AddSubMenuEx("Spells", "Spells") : menu.AddSubMenuEx("Spells", "Spells");
 
             LoadSpellDictionary();
             InitChannelSpells();
@@ -77,7 +79,7 @@ namespace ezEvade
                 
         private void SpellMissile_OnCreate(GameObject obj, EventArgs args)
         {
-            if (!obj.IsValid<MissileClient>())
+            if ((obj as MissileClient) == null || !(obj as MissileClient).IsValidMissile())
                 return;
 
             MissileClient missile = (MissileClient)obj;
@@ -141,7 +143,7 @@ namespace ezEvade
                     }
                     else
                     {
-                        if (ObjectCache.menuCache.cache["DodgeFOWSpells"].GetValue<bool>())
+                        if (ObjectCache.menuCache.cache["DodgeFOWSpells"].Cast<CheckBox>().CurrentValue)
                         {
                             CreateSpellData(hero, missile.StartPosition, missile.EndPosition, spellData, obj);
                         }
@@ -152,7 +154,7 @@ namespace ezEvade
 
         private void SpellMissile_OnDelete(GameObject obj, EventArgs args)
         {
-            if (!obj.IsValid<MissileClient>())
+            if ((obj as MissileClient) == null || !(obj as MissileClient).IsValidMissile())
                 return;
 
             MissileClient missile = (MissileClient)obj;
@@ -170,7 +172,7 @@ namespace ezEvade
         private void SpellMissile_OnCreateOld(GameObject obj, EventArgs args)
         {
 
-            if (!obj.IsValid<Obj_SpellMissile>())
+            if ((obj as MissileClient) == null || !(obj as MissileClient).IsValidMissile())
                 return;
 
             Obj_SpellMissile missile = (Obj_SpellMissile)obj;
@@ -213,7 +215,7 @@ namespace ezEvade
                     }
                     else
                     {
-                        if (ObjectCache.menuCache.cache["DodgeFOWSpells"].GetValue<bool>())
+                        if (ObjectCache.menuCache.cache["DodgeFOWSpells"].Cast<CheckBox>().CurrentValue)
                         {
                             CreateSpellData(hero, missile.StartPosition, missile.EndPosition, spellData, obj);
                         }
@@ -224,7 +226,7 @@ namespace ezEvade
 
         private void SpellMissile_OnDeleteOld(GameObject obj, EventArgs args)
         {
-            if (!obj.IsValid<Obj_SpellMissile>())
+            if ((obj as MissileClient) == null || !(obj as MissileClient).IsValidMissile())
                 return;
 
             Obj_SpellMissile missile = (Obj_SpellMissile)obj;
@@ -462,7 +464,7 @@ namespace ezEvade
 
         private static void CheckSpellCollision()
         {
-            if (ObjectCache.menuCache.cache["CheckSpellCollision"].GetValue<bool>() == false)
+            if (ObjectCache.menuCache.cache["CheckSpellCollision"].Cast<CheckBox>().CurrentValue == false)
             {
                 return;
             }
@@ -488,7 +490,7 @@ namespace ezEvade
 
         public static bool CanHeroWalkIntoSpell(Spell spell)
         {
-            if (ObjectCache.menuCache.cache["AdvancedSpellDetection"].GetValue<bool>())
+            if (ObjectCache.menuCache.cache["AdvancedSpellDetection"].Cast<CheckBox>().CurrentValue)
             {
                 Vector2 heroPos = myHero.Position.To2D();
                 var extraDist = myHero.Distance(ObjectCache.myHeroCache.serverPos2D);
@@ -549,7 +551,7 @@ namespace ezEvade
                 spell.spellHitTime = spellHitTime;
                 spell.evadeTime = evadeTime;
 
-                var extraDelay = ObjectCache.gamePing + ObjectCache.menuCache.cache["ExtraPingBuffer"].GetValue<Slider>().Value;
+                var extraDelay = ObjectCache.gamePing + ObjectCache.menuCache.cache["ExtraPingBuffer"].Cast<Slider>().CurrentValue;
 
                 if (spell.spellHitTime - extraDelay < 1500 && CanHeroWalkIntoSpell(spell))
                 //if(true)
@@ -563,18 +565,18 @@ namespace ezEvade
                     }
 
                     //var spellFlyTime = Evade.GetTickCount - spell.startTime;
-                    if (spellHitTime < ObjectCache.menuCache.cache["SpellDetectionTime"].GetValue<Slider>().Value)
+                    if (spellHitTime < ObjectCache.menuCache.cache["SpellDetectionTime"].Cast<Slider>().CurrentValue)
                     {
                         continue;
                     }
 
                     if (EvadeUtils.TickCount - spell.startTime <
-                        ObjectCache.menuCache.cache["ReactionTime"].GetValue<Slider>().Value)
+                        ObjectCache.menuCache.cache["ReactionTime"].Cast<Slider>().CurrentValue)
                     {
                         continue;
                     }
 
-                    var dodgeInterval = ObjectCache.menuCache.cache["DodgeInterval"].GetValue<Slider>().Value;
+                    var dodgeInterval = ObjectCache.menuCache.cache["DodgeInterval"].Cast<Slider>().CurrentValue;
                     if (Evade.lastPosInfo != null && dodgeInterval > 0)
                     {
                         var timeElapsed = EvadeUtils.TickCount - Evade.lastPosInfo.timestamp;
@@ -590,10 +592,10 @@ namespace ezEvade
                     if (!spells.ContainsKey(spell.spellID))
                     {
                         if (!(Evade.isDodgeDangerousEnabled() && newSpell.GetSpellDangerLevel() < 3)
-                            && ObjectCache.menuCache.cache[newSpell.info.spellName + "DodgeSpell"].GetValue<bool>())
+                            && ObjectCache.menuCache.cache[newSpell.info.spellName + "DodgeSpell"].Cast<CheckBox>().CurrentValue)
                         {
                             if (newSpell.spellType == SpellType.Circular
-                                && ObjectCache.menuCache.cache["DodgeCircularSpells"].GetValue<bool>() == false)
+                                && ObjectCache.menuCache.cache["DodgeCircularSpells"].Cast<CheckBox>().CurrentValue == false)
                             {
                                 //return spellID;
                                 continue;
@@ -605,7 +607,7 @@ namespace ezEvade
                         }
                     }
 
-                    if (ObjectCache.menuCache.cache["CheckSpellCollision"].GetValue<bool>()
+                    if (ObjectCache.menuCache.cache["CheckSpellCollision"].Cast<CheckBox>().CurrentValue
                         && spell.predictedEndPos != Vector2.Zero)
                     {
                         spellAdded = false;
@@ -738,23 +740,27 @@ namespace ezEvade
             channeledSpells["Recall"] = "AllChampions";
 
         }
-
+        
         public static void LoadDummySpell(SpellData spell)
         {
             string menuName = spell.charName + " (" + spell.spellKey.ToString() + ") Settings";
 
             var enableSpell = !spell.defaultOff;
 
-            Menu newSpellMenu = new Menu(menuName, spell.charName + spell.spellName + "Settings");
-            newSpellMenu.AddItem(new MenuItem(spell.spellName + "DodgeSpell", "Dodge Spell").SetValue(enableSpell));
-            newSpellMenu.AddItem(new MenuItem(spell.spellName + "DrawSpell", "Draw Spell").SetValue(enableSpell));
-            newSpellMenu.AddItem(new MenuItem(spell.spellName + "SpellRadius", "Spell Radius")
-                .SetValue(new Slider((int)spell.radius, (int)spell.radius - 100, (int)spell.radius + 100)));
-            newSpellMenu.AddItem(new MenuItem(spell.spellName + "DangerLevel", "Danger Level")
-                .SetValue(new StringList(new[] { "Low", "Normal", "High", "Extreme" }, spell.dangerlevel - 1)));
+            Menu newSpellMenu = spellMenu.IsSubMenu ? spellMenu.Parent.AddSubMenuEx(menuName, spell.charName + spell.spellName + "Settings") : spellMenu.AddSubMenuEx(menuName, spell.charName + spell.spellName + "Settings");
+            newSpellMenu.Add(spell.spellName + "DodgeSpell", new CheckBox("Dodge Spell", enableSpell));
+            newSpellMenu.Add(spell.spellName + "DrawSpell", new CheckBox("Draw Spell", enableSpell));
+            newSpellMenu.Add(spell.spellName + "SpellRadius", new Slider("Spell Radius", (int)spell.radius, (int)spell.radius - 100, (int)spell.radius + 100));
 
-            spellMenu.AddSubMenu(newSpellMenu);
 
+            var slider = newSpellMenu.Add(spell.spellName + "DangerLevel", new Slider("Danger Level", spell.dangerlevel - 1, 0, 3));
+            var array = new[] {"Low", "Normal", "High", "Extreme"};
+            slider.OnValueChange += delegate(ValueBase<int> sender, ValueBase<int>.ValueChangeArgs args)
+            {
+                sender.DisplayName = array[args.NewValue];
+            };
+            slider.DisplayName = array[slider.CurrentValue];
+       
             ObjectCache.menuCache.AddMenuToCache(newSpellMenu);
         }
 
@@ -791,12 +797,12 @@ namespace ezEvade
 
             foreach (var hero in HeroManager.Enemies)
             {
-                var championPlugin = Assembly.GetExecutingAssembly()
-                    .GetTypes()
-                    .FindAll(t => t.IsClass && t.Namespace == "ezEvade.SpecialSpells"
-                               && t.Name == hero.ChampionName
+                var championPlugin = Assembly
+                    .GetExecutingAssembly()
+                    .GetTypes(
                                )
-                    .FirstOrDefault();
+                    .FirstOrDefault(t => t.IsClass && t.Namespace == "ezEvade.SpecialSpells"
+                               && t.Name == hero.ChampionName);
 
                 if (championPlugin != null)
                 {
@@ -878,15 +884,19 @@ namespace ezEvade
 
                             var enableSpell = !spell.defaultOff;
 
-                            Menu newSpellMenu = new Menu(menuName, spell.charName + spell.spellName + "Settings");
-                            newSpellMenu.AddItem(new MenuItem(spell.spellName + "DodgeSpell", "Dodge Spell").SetValue(enableSpell));
-                            newSpellMenu.AddItem(new MenuItem(spell.spellName + "DrawSpell", "Draw Spell").SetValue(enableSpell));
-                            newSpellMenu.AddItem(new MenuItem(spell.spellName + "SpellRadius", "Spell Radius")
-                                .SetValue(new Slider((int)spell.radius, (int)spell.radius - 100, (int)spell.radius + 100)));
-                            newSpellMenu.AddItem(new MenuItem(spell.spellName + "DangerLevel", "Danger Level")
-                                .SetValue(new StringList(new[] { "Low", "Normal", "High", "Extreme" }, spell.dangerlevel - 1)));
+                            Menu newSpellMenu = spellMenu.IsSubMenu ? spellMenu.Parent.AddSubMenuEx(menuName, spell.charName + spell.spellName + "Settings") : spellMenu.AddSubMenuEx(menuName, spell.charName + spell.spellName + "Settings");
+                            newSpellMenu.Add(spell.spellName + "DodgeSpell", new CheckBox("Dodge Spell", enableSpell));
+                            newSpellMenu.Add(spell.spellName + "DrawSpell", new CheckBox("Draw Spell", enableSpell));
+                            newSpellMenu.Add(spell.spellName + "SpellRadius", new Slider("Spell Radius", (int)spell.radius, (int)spell.radius - 100, (int)spell.radius + 100));
+                            var slider = newSpellMenu.Add(spell.spellName + "DangerLevel", new Slider("Danger Level", spell.dangerlevel - 1, 0, 3));
+                            var array = new[] {"Low", "Normal", "High", "Extreme"};
+                            slider.OnValueChange +=
+                                delegate(ValueBase<int> sender, ValueBase<int>.ValueChangeArgs args)
+                                {
+                                    sender.DisplayName = array[args.NewValue];
+                                };
+                            slider.DisplayName = array[slider.CurrentValue];
 
-                            spellMenu.AddSubMenu(newSpellMenu);
                         }
                     }
 

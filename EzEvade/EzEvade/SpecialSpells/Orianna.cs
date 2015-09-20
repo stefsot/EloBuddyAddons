@@ -76,7 +76,7 @@ namespace ezEvade.SpecialSpells
 
         private static void ProcessSpell_OrianaRedactCommand(Obj_AI_Base hero, GameObjectProcessSpellCastEventArgs args)
         {
-            if (!hero.IsValid<AIHeroClient>())
+            if ((hero as AIHeroClient) == null || !(hero as AIHeroClient).IsValid())
                 return;
 
             var champ = (AIHeroClient)hero;

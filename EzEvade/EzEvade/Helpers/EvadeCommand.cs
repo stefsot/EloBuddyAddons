@@ -52,7 +52,7 @@ namespace ezEvade
             Evade.lastMoveToPosition = movePos;
             Evade.lastMoveToServerPos = myHero.ServerPosition.To2D();
 
-            myHero.IssueOrder(GameObjectOrder.MoveTo, movePos.To3D(), false);
+            Player.IssueOrder(GameObjectOrder.MoveTo, movePos.To3D(), false);
         }
 
         public static void Attack(EvadeSpellData spellData, Obj_AI_Base target)
@@ -66,7 +66,7 @@ namespace ezEvade
                 isProcessed = false
             };
 
-            myHero.IssueOrder(GameObjectOrder.AttackUnit, target, false);
+            Player.IssueOrder(GameObjectOrder.AttackUnit, target, false);
         }
 
         public static void CastSpell(EvadeSpellData spellData, Obj_AI_Base target)

@@ -8,6 +8,9 @@ using Color = System.Drawing.Color;
 
 using EloBuddy;
 using EloBuddy.SDK;
+using EloBuddy.SDK.Menu;
+using EloBuddy.SDK.Menu.Values;
+using EzEvade;
 using SharpDX;
 
 namespace ezEvade
@@ -22,7 +25,7 @@ namespace ezEvade
 
         private static float maxExtraDelayTime = 0;
 
-        private static GameObjectIssueOrderEventArgs lastIssueOrderArgs;
+        private static PlayerIssueOrderEventArgs lastIssueOrderArgs;
         private static Vector2 lastMoveToServerPos;
         private static Vector2 lastPathEndPos;
 
@@ -42,7 +45,7 @@ namespace ezEvade
         public AutoSetPing(Menu mainMenu)
         {
             AIHeroClient.OnNewPath += Hero_OnNewPath;
-            AIHeroClient.OnIssueOrder += Hero_OnIssueOrder;
+            Player.OnIssueOrder += Hero_OnIssueOrder;
 
             Spellbook.OnCastSpell += Game_OnCastSpell;
             MissileClient.OnCreate += Game_OnCreateObj;
@@ -52,13 +55,12 @@ namespace ezEvade
 
             //Drawing.OnDraw += Game_OnDraw;
 
-            Menu autoSetPingMenu = new Menu("AutoSetPing", "AutoSetPingMenu");
-            autoSetPingMenu.AddItem(new MenuItem("AutoSetPingOn", "Auto Set Ping").SetValue<bool>(true));
-            autoSetPingMenu.AddItem(new MenuItem("AutoSetPercentile", "Auto Set Percentile").SetValue(new Slider(75, 0, 100)));
+            Menu autoSetPingMenu = mainMenu.IsSubMenu ? mainMenu.Parent.AddSubMenuEx("AutoSetPing", "AutoSetPingMenu") : mainMenu.AddSubMenuEx("AutoSetPing", "AutoSetPingMenu");
+            autoSetPingMenu.Add("AutoSetPingOn", new CheckBox("Auto Set Ping", true));
+            autoSetPingMenu.Add("AutoSetPercentile", new Slider("Auto Set Percentile", 75, 0, 100));
+
 
             //autoSetPingMenu.AddItem(new MenuItem("TestSkillshotDelay", "TestSkillshotDelay").SetValue<bool>(false));
-
-            mainMenu.AddSubMenu(autoSetPingMenu);
 
             menu = mainMenu;
         }
@@ -124,11 +126,11 @@ namespace ezEvade
 
         private void Game_OnUpdate(EventArgs args)
         {
-            if (ObjectCache.menuCache.cache["TestSkillshotDelay"].GetValue<bool>())
+            if (ObjectCache.menuCache.cache["TestSkillshotDelay"].Cast<CheckBox>().CurrentValue)
             {
                 testSkillshotDelayStart = EvadeUtils.TickCount;
                 testSkillshotDelayOn = true;
-                ObjectCache.menuCache.cache["TestSkillshotDelay"].SetValue<bool>(false);
+                ObjectCache.menuCache.cache["TestSkillshotDelay"].Cast<CheckBox>().CurrentValue = false;
             }
 
             if (testSkillshotDelayOn && SpellDetector.spells.Count() > 0)
@@ -140,7 +142,7 @@ namespace ezEvade
 
         }
 
-        private void Hero_OnIssueOrder(Obj_AI_Base hero, GameObjectIssueOrderEventArgs args)
+        private void Hero_OnIssueOrder(Obj_AI_Base hero, PlayerIssueOrderEventArgs args)
         {
             checkPing = false;
 
@@ -148,7 +150,7 @@ namespace ezEvade
             float moveTime = 1000 * distance / myHero.MoveSpeed;
             //Console.WriteLine("Extra Delay: " + moveTime);
 
-            if (ObjectCache.menuCache.cache["AutoSetPingOn"].GetValue<bool>() == false)
+            if (ObjectCache.menuCache.cache["AutoSetPingOn"].Cast<CheckBox>().CurrentValue == false)
             {
                 return;
             }
@@ -173,7 +175,7 @@ namespace ezEvade
 
         private void Hero_OnNewPath(Obj_AI_Base hero, GameObjectNewPathEventArgs args)
         {
-            if (ObjectCache.menuCache.cache["AutoSetPingOn"].GetValue<bool>() == false)
+            if (ObjectCache.menuCache.cache["AutoSetPingOn"].Cast<CheckBox>().CurrentValue == false)
             {
                 return;
             }
@@ -249,17 +251,18 @@ namespace ezEvade
 
                                 if (maxExtraDelayTime == 0)
                                 {
-                                    maxExtraDelayTime = ObjectCache.menuCache.cache["ExtraPingBuffer"].GetValue<Slider>().Value;
+                                    maxExtraDelayTime = ObjectCache.menuCache.cache["ExtraPingBuffer"].Cast<Slider>().CurrentValue;
                                 }
 
                                 if (numExtraDelayTime % 100 == 0)
                                 {
                                     pingList.Sort();
 
-                                    var percentile = ObjectCache.menuCache.cache["AutoSetPercentile"].GetValue<Slider>().Value;
+                                    var percentile = ObjectCache.menuCache.cache["AutoSetPercentile"].Cast<Slider>().CurrentValue;
                                     int percentIndex = (int)Math.Floor(pingList.Count() * (percentile / 100f)) - 1;
                                     maxExtraDelayTime = Math.Max(pingList.ElementAt(percentIndex) - Game.Ping,0);
-                                    ObjectCache.menuCache.cache["ExtraPingBuffer"].SetValue(new Slider((int)maxExtraDelayTime, 0, 200));
+                                    ObjectCache.menuCache.cache["ExtraPingBuffer"].Cast<Slider>().CurrentValue =
+                                        (int) maxExtraDelayTime;
 
                                     pingList.Clear();
 

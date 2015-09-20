@@ -7,6 +7,9 @@ using Color = System.Drawing.Color;
 
 using EloBuddy;
 using EloBuddy.SDK;
+using EloBuddy.SDK.Menu;
+using EloBuddy.SDK.Menu.Values;
+using EzEvade;
 using SharpDX;
 
 namespace ezEvade
@@ -30,42 +33,30 @@ namespace ezEvade
         {
             //Console.WriteLine("SpellDrawer loaded");
 
-            Menu drawMenu = new Menu("Draw", "Draw");
-            drawMenu.AddItem(new MenuItem("DrawSkillShots", "Draw SkillShots").SetValue(true));
-            drawMenu.AddItem(new MenuItem("ShowStatus", "Show Evade Status").SetValue(true));
-            drawMenu.AddItem(new MenuItem("DrawSpellPos", "Draw Spell Position").SetValue(false));
-            drawMenu.AddItem(new MenuItem("DrawEvadePosition", "Draw Evade Position").SetValue(false));
 
-            Menu dangerMenu = new Menu("DangerLevel Drawings", "DangerLevelDrawings");
-            Menu lowDangerMenu = new Menu("Low", "LowDrawing");
-            lowDangerMenu.AddItem(new MenuItem("LowWidth", "Line Width").SetValue(new Slider(3, 1, 15)));
-            lowDangerMenu.AddItem(new MenuItem("LowColor", "Color").SetValue(new Circle(true, Color.FromArgb(60, 255, 255, 255))));
+            Menu drawMenu = menu.IsSubMenu ? menu.Parent.AddSubMenuEx("Draw", "Draw") : menu.AddSubMenuEx("Draw", "Draw");
+            drawMenu.Add("DrawSkillShots", new CheckBox("Draw SkillShots", true));
+            drawMenu.Add("ShowStatus", new CheckBox("Show Evade Status", true));
+            drawMenu.Add("DrawSpellPos", new CheckBox("Draw Spell Position", false));
+            drawMenu.Add("DrawEvadePosition", new CheckBox("Draw Evade Position", false));
 
-            Menu normalDangerMenu = new Menu("Normal", "NormalDrawing");
-            normalDangerMenu.AddItem(new MenuItem("NormalWidth", "Line Width").SetValue(new Slider(3, 1, 15)));
-            normalDangerMenu.AddItem(new MenuItem("NormalColor", "Color").SetValue(new Circle(true, Color.FromArgb(140, 255, 255, 255))));
+            Menu dangerMenu = drawMenu.Parent.AddSubMenuEx("DangerLevel Drawings", "DangerLevelDrawings");
+            Menu lowDangerMenu = dangerMenu.Parent.AddSubMenuEx("Low", "LowDrawing");
+            lowDangerMenu.Add("LowWidth", new Slider("Line Width", 3, 1, 15));
 
-            Menu highDangerMenu = new Menu("High", "HighDrawing");
-            highDangerMenu.AddItem(new MenuItem("HighWidth", "Line Width").SetValue(new Slider(4, 1, 15)));
-            highDangerMenu.AddItem(new MenuItem("HighColor", "Color").SetValue(new Circle(true, Color.FromArgb(255, 255, 255, 255))));
+            Menu normalDangerMenu = dangerMenu.Parent.AddSubMenuEx("Normal", "NormalDrawing");
+            normalDangerMenu.Add("NormalWidth", new Slider("Line Width", 3, 1, 15));
 
-            Menu extremeDangerMenu = new Menu("Extreme", "ExtremeDrawing");
-            extremeDangerMenu.AddItem(new MenuItem("ExtremeWidth", "Line Width").SetValue(new Slider(4, 1, 15)));
-            extremeDangerMenu.AddItem(new MenuItem("ExtremeColor", "Color").SetValue(new Circle(true, Color.FromArgb(255, 255, 255, 255))));
+            Menu highDangerMenu = dangerMenu.Parent.AddSubMenuEx("High", "HighDrawing");
+            highDangerMenu.Add("HighWidth", new Slider("Line Width", 4, 1, 15));
+
+            Menu extremeDangerMenu = dangerMenu.Parent.AddSubMenuEx("Extreme", "ExtremeDrawing");
+            extremeDangerMenu.Add("ExtremeWidth", new Slider("Line Width", 4, 1, 15));
 
             /*
             Menu undodgeableDangerMenu = new Menu("Undodgeable", "Undodgeable");
             undodgeableDangerMenu.AddItem(new MenuItem("Width", "Line Width").SetValue(new Slider(6, 1, 15)));
             undodgeableDangerMenu.AddItem(new MenuItem("Color", "Color").SetValue(new Circle(true, Color.FromArgb(255, 255, 0, 0))));*/
-
-            dangerMenu.AddSubMenu(lowDangerMenu);
-            dangerMenu.AddSubMenu(normalDangerMenu);
-            dangerMenu.AddSubMenu(highDangerMenu);
-            dangerMenu.AddSubMenu(extremeDangerMenu);
-
-            drawMenu.AddSubMenu(dangerMenu);
-
-            menu.AddSubMenu(drawMenu);
         }
 
         private void DrawLineRectangle(Vector2 start, Vector2 end, int radius, int width, Color color)
@@ -91,12 +82,12 @@ namespace ezEvade
 
         private void DrawEvadeStatus()
         {
-            if (ObjectCache.menuCache.cache["ShowStatus"].GetValue<bool>())
+            if (ObjectCache.menuCache.cache["ShowStatus"].Cast<CheckBox>().CurrentValue)
             {
                 var heroPos = Drawing.WorldToScreen(ObjectManager.Player.Position);
-                var dimension = Drawing.GetTextExtent("Evade: ON");
+                var dimension = Drawing.GetTextEntent("Evade: ON", 12);
 
-                if (ObjectCache.menuCache.cache["DodgeSkillShots"].GetValue<KeyBind>().Active)
+                if (ObjectCache.menuCache.cache["DodgeSkillShots"].Cast<KeyBind>().CurrentValue)
                 {
                     if (Evade.isDodging)
                     {
@@ -112,7 +103,7 @@ namespace ezEvade
                 }
                 else
                 {
-                    if (ObjectCache.menuCache.cache["ActivateEvadeSpells"].GetValue<KeyBind>().Active)
+                    if (ObjectCache.menuCache.cache["ActivateEvadeSpells"].Cast<KeyBind>().CurrentValue)
                     {
                         Drawing.DrawText(heroPos.X - dimension.Width / 2, heroPos.Y, Color.Purple, "Evade: Spell");
                     }
@@ -130,7 +121,7 @@ namespace ezEvade
         private void Drawing_OnDraw(EventArgs args)
         {
 
-            if (ObjectCache.menuCache.cache["DrawEvadePosition"].GetValue<bool>())
+            if (ObjectCache.menuCache.cache["DrawEvadePosition"].Cast<CheckBox>().CurrentValue)
             {
                 //Render.Circle.DrawCircle(myHero.Position.ExtendDir(dir, 500), 65, Color.Red, 10);
 
@@ -148,7 +139,7 @@ namespace ezEvade
 
             DrawEvadeStatus();
 
-            if (ObjectCache.menuCache.cache["DrawSkillShots"].GetValue<bool>() == false)
+            if (ObjectCache.menuCache.cache["DrawSkillShots"].Cast<CheckBox>().CurrentValue == false)
             {
                 return;
             }
@@ -158,25 +149,24 @@ namespace ezEvade
                 Spell spell = entry.Value;
 
                 var dangerStr = spell.GetSpellDangerString();
-                var spellDrawingConfig = ObjectCache.menuCache.cache[dangerStr + "Color"].GetValue<Circle>();
-                var spellDrawingWidth = ObjectCache.menuCache.cache[dangerStr + "Width"].GetValue<Slider>().Value;
+                //var spellDrawingConfig = ObjectCache.menuCache.cache[dangerStr + "Color"].GetValue<Circle>();
+                var spellDrawingWidth = ObjectCache.menuCache.cache[dangerStr + "Width"].Cast<Slider>().CurrentValue;
 
-                if (ObjectCache.menuCache.cache[spell.info.spellName + "DrawSpell"].GetValue<bool>()
-                    && spellDrawingConfig.Active)
+                if (ObjectCache.menuCache.cache[spell.info.spellName + "DrawSpell"].Cast<CheckBox>().CurrentValue)
                 {
                     if (spell.spellType == SpellType.Line)
                     {
                         Vector2 spellPos = spell.currentSpellPosition;
                         Vector2 spellEndPos = spell.GetSpellEndPosition();
 
-                        DrawLineRectangle(spellPos, spellEndPos, (int)spell.radius, spellDrawingWidth, spellDrawingConfig.Color);
+                        DrawLineRectangle(spellPos, spellEndPos, (int)spell.radius, spellDrawingWidth, Color.Red);
 
                         /*foreach (var hero in ObjectManager.Get<AIHeroClient>())
                         {
                             Render.Circle.DrawCircle(new Vector3(hero.ServerPosition.X, hero.ServerPosition.Y, myHero.Position.Z), (int)spell.radius, Color.Red, 5);
                         }*/
 
-                        if (ObjectCache.menuCache.cache["DrawSpellPos"].GetValue<bool>())// && spell.spellObject != null)
+                        if (ObjectCache.menuCache.cache["DrawSpellPos"].Cast<CheckBox>().CurrentValue)// && spell.spellObject != null)
                         {
                             //spellPos = SpellDetector.GetCurrentSpellPosition(spell, true, ObjectCache.gamePing);
 
@@ -189,17 +179,17 @@ namespace ezEvade
                             /*if (spell.spellObject != null && spell.spellObject.IsValid && spell.spellObject.IsVisible &&
                                   spell.spellObject.Position.To2D().Distance(ObjectCache.myHeroCache.serverPos2D) < spell.info.range + 1000)*/
 
-                            Render.Circle.DrawCircle(new Vector3(spellPos.X, spellPos.Y, myHero.Position.Z), (int)spell.radius, spellDrawingConfig.Color, spellDrawingWidth);
+                            Render.Circle.DrawCircle(new Vector3(spellPos.X, spellPos.Y, myHero.Position.Z), (int)spell.radius, Color.Red, spellDrawingWidth);
                         }
 
                     }
                     else if (spell.spellType == SpellType.Circular)
                     {
-                        Render.Circle.DrawCircle(new Vector3(spell.endPos.X, spell.endPos.Y, spell.height), (int)spell.radius, spellDrawingConfig.Color, spellDrawingWidth);
+                        Render.Circle.DrawCircle(new Vector3(spell.endPos.X, spell.endPos.Y, spell.height), (int)spell.radius, Color.Red, spellDrawingWidth);
 
                         if (spell.info.spellName == "VeigarEventHorizon")
                         {
-                            Render.Circle.DrawCircle(new Vector3(spell.endPos.X, spell.endPos.Y, spell.height), (int)spell.radius - 125, spellDrawingConfig.Color, spellDrawingWidth);
+                            Render.Circle.DrawCircle(new Vector3(spell.endPos.X, spell.endPos.Y, spell.height), (int)spell.radius - 125, Color.Red, spellDrawingWidth);
                         }
                     }
                     else if (spell.spellType == SpellType.Arc)

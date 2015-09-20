@@ -5,6 +5,10 @@ using System.Text;
 
 using EloBuddy;
 using EloBuddy.SDK;
+using EloBuddy.SDK.Events;
+using EloBuddy.SDK.Menu;
+using EloBuddy.SDK.Menu.Values;
+using EzEvade;
 using SharpDX;
 
 namespace ezEvade
@@ -28,8 +32,7 @@ namespace ezEvade
 
             //Game.OnUpdate += Game_OnGameUpdate;
 
-            evadeSpellMenu = new Menu("Evade Spells", "EvadeSpells");
-            menu.AddSubMenu(evadeSpellMenu);
+            evadeSpellMenu = menu.IsSubMenu ? menu.Parent.AddSubMenuEx("Evade Spells", "EvadeSpells") : menu.AddSubMenuEx("Evade Spells", "EvadeSpells");
 
             LoadEvadeSpellList();
             DelayAction.Add(100, () => CheckForItems());
@@ -45,10 +48,8 @@ namespace ezEvade
             if (EvadeUtils.TickCount - lastSpellEvadeCommand.timestamp < 250 && myHero.IsDashing()
                 && lastSpellEvadeCommand.evadeSpellData.evadeType == EvadeType.Dash)
             {
-                var dashInfo = myHero.GetDashInfo();
-
                 //Console.WriteLine("" + dashInfo.EndPos.Distance(lastSpellEvadeCommand.targetPosition));
-                lastSpellEvadeCommand.targetPosition = dashInfo.EndPos;
+                lastSpellEvadeCommand.targetPosition = Prediction.Position.GetDashPos(Player.Instance);
             }
         }
 
@@ -80,21 +81,22 @@ namespace ezEvade
                 menuName = spell.name + " Settings";
             }
 
-            Menu newSpellMenu = new Menu(menuName, spell.charName + spell.name + "EvadeSpellSettings");
-            newSpellMenu.AddItem(new MenuItem(spell.name + "UseEvadeSpell", "Use Spell").SetValue(true));
+            Menu newSpellMenu = evadeSpellMenu.IsSubMenu ? evadeSpellMenu.Parent.AddSubMenuEx(menuName, spell.charName + spell.name + "EvadeSpellSettings") : evadeSpellMenu.AddSubMenuEx(menuName, spell.charName + spell.name + "EvadeSpellSettings");
+            newSpellMenu.Add(spell.name + "UseEvadeSpell", new CheckBox("Use Spell", true));
+            newSpellMenu.Add(spell.name + "EvadeSpellDangerLevel", new Slider("Danger Level", spell.dangerlevel - 1, 0, 4));
 
-            newSpellMenu.AddItem(new MenuItem(spell.name + "EvadeSpellDangerLevel", "Danger Level")
-                .SetValue(new StringList(new[] { "Low", "Normal", "High", "Extreme" }, spell.dangerlevel - 1)));
+            var slider = newSpellMenu.Add(spell.name + "EvadeSpellMode", new Slider("Spell Mode", GetDefaultSpellMode(spell), 0, 2));
+            var array = new[] { "Undodgeable", "Activation Time", "Always" };
+            slider.OnValueChange += delegate(ValueBase<int> sender, ValueBase<int>.ValueChangeArgs args)
+            {
+                sender.DisplayName = array[args.NewValue];
+            };
+            slider.DisplayName = array[slider.CurrentValue];
+
             //newSpellMenu.AddItem(new MenuItem(spell.name + "SpellActivationTime", "Spell Activation Time").SetValue(new Slider(0, 0, 1000)));
 
             //Menu newSpellMiscMenu = new Menu("Misc Settings", spell.charName + spell.name + "EvadeSpellMiscSettings");
-            //newSpellMenu.AddSubMenu(newSpellMiscMenu);
-
-            newSpellMenu.AddItem(new MenuItem(spell.name + "EvadeSpellMode", "Spell Mode")
-                .SetValue(new StringList(new[] { "Undodgeable", "Activation Time", "Always" },
-                    GetDefaultSpellMode(spell))));
-
-            evadeSpellMenu.AddSubMenu(newSpellMenu);
+            //newSpellMenu.AddSubMenuEx(newSpellMiscMenu);
 
             return newSpellMenu;
         }
@@ -164,10 +166,10 @@ namespace ezEvade
         {
             var sortedEvadeSpells = evadeSpells.OrderBy(s => s.dangerlevel);
 
-            var extraDelayBuffer = ObjectCache.menuCache.cache["ExtraPingBuffer"].GetValue<Slider>().Value;
-            float spellActivationTime = ObjectCache.menuCache.cache["SpellActivationTime"].GetValue<Slider>().Value + ObjectCache.gamePing + extraDelayBuffer;
+            var extraDelayBuffer = ObjectCache.menuCache.cache["ExtraPingBuffer"].Cast<Slider>().CurrentValue;
+            float spellActivationTime = ObjectCache.menuCache.cache["SpellActivationTime"].Cast<Slider>().CurrentValue + ObjectCache.gamePing + extraDelayBuffer;
 
-            if (ObjectCache.menuCache.cache["CalculateWindupDelay"].GetValue<bool>())
+            if (ObjectCache.menuCache.cache["CalculateWindupDelay"].Cast<CheckBox>().CurrentValue)
             {
                 var extraWindupDelay = Evade.lastWindupTime - EvadeUtils.TickCount;
                 if (extraWindupDelay > 0)
@@ -180,7 +182,7 @@ namespace ezEvade
             {
                 var processSpell = true;
 
-                if (ObjectCache.menuCache.cache[evadeSpell.name + "UseEvadeSpell"].GetValue<bool>() == false
+                if (ObjectCache.menuCache.cache[evadeSpell.name + "UseEvadeSpell"].Cast<CheckBox>().CurrentValue == false
                     || GetSpellDangerLevel(evadeSpell) > spell.GetSpellDangerLevel()
                     || (evadeSpell.isItem == false && !(myHero.Spellbook.CanUseSpell(evadeSpell.spellKey) == SpellState.Ready))
                     || (evadeSpell.isItem == true && !(Items.CanUseItem((int)evadeSpell.itemID)))
@@ -190,6 +192,7 @@ namespace ezEvade
                     continue; //can't use spell right now               
                 }
 
+
                 float evadeTime, spellHitTime = 0;
                 spell.CanHeroEvade(myHero, out evadeTime, out spellHitTime);
 
@@ -198,7 +201,7 @@ namespace ezEvade
                 if (checkSpell)
                 {
                     var mode = ObjectCache.menuCache.cache[evadeSpell.name + "EvadeSpellMode"]
-                        .GetValue<StringList>().SelectedIndex;
+                        .Cast<Slider>().CurrentValue;
 
                     if (mode == 0)
                     {
@@ -214,7 +217,7 @@ namespace ezEvade
                 }
                 else
                 {
-                    //if (ObjectCache.menuCache.cache[evadeSpell.name + "LastResort"].GetValue<bool>())
+                    //if (ObjectCache.menuCache.cache[evadeSpell.name + "LastResort"].Cast<CheckBox>().CurrentValue)
                     if (evadeSpell.spellDelay <= 50 && evadeSpell.evadeType != EvadeType.Dash)
                     {
                         var path = myHero.Path;
@@ -232,7 +235,7 @@ namespace ezEvade
                 }
 
                 if (evadeSpell.evadeType != EvadeType.Dash && spellHitTime > evadeSpell.spellDelay + 100 + Game.Ping +
-                    ObjectCache.menuCache.cache["ExtraPingBuffer"].GetValue<Slider>().Value)
+                    ObjectCache.menuCache.cache["ExtraPingBuffer"].Cast<Slider>().CurrentValue)
                 {
                     processSpell = false;
 
@@ -376,7 +379,7 @@ namespace ezEvade
             if (Evade.lastPosInfo == null)
                 return false;
 
-            if (ObjectCache.menuCache.cache["DodgeSkillShots"].GetValue<KeyBind>().Active)
+            if (ObjectCache.menuCache.cache["DodgeSkillShots"].Cast<KeyBind>().CurrentValue)
             {
                 if (Evade.lastPosInfo.undodgeableSpells.Contains(spell.spellID)
                 && ObjectCache.myHeroCache.serverPos2D.InSkillShot(spell, ObjectCache.myHeroCache.boundingRadius))
@@ -394,7 +397,7 @@ namespace ezEvade
 
 
             /*float activationTime = Evade.menu.SubMenu("MiscSettings").SubMenu("EvadeSpellMisc").Item("EvadeSpellActivationTime")
-                .GetValue<Slider>().Value + ObjectCache.gamePing;
+                .Cast<Slider>().CurrentValue + ObjectCache.gamePing;
 
             if (spell.spellHitTime != float.MinValue && activationTime > spell.spellHitTime - spell.evadeTime)
             {
@@ -406,7 +409,7 @@ namespace ezEvade
 
         public static int GetSpellDangerLevel(EvadeSpellData spell)
         {
-            var dangerStr = ObjectCache.menuCache.cache[spell.name + "EvadeSpellDangerLevel"].GetValue<StringList>().SelectedValue;
+            var dangerStr = ObjectCache.menuCache.cache[spell.name + "EvadeSpellDangerLevel"].Cast<Slider>().DisplayName;
 
             var dangerlevel = 1;
 

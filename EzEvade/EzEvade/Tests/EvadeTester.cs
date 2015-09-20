@@ -10,6 +10,9 @@ using EloBuddy.SDK;
 using EloBuddy.SDK.Events;
 using EloBuddy.SDK.Menu;
 using EloBuddy.SDK.Menu.Values;
+using EloBuddy.SDK.Rendering;
+using EzEvade;
+using Microsoft.SqlServer.Server;
 using SharpDX;
 
 namespace ezEvade
@@ -98,7 +101,7 @@ namespace ezEvade
 
             menu = mainMenu;
 
-            testMenu = mainMenu.AddSubMenu("Test", "Test");
+            testMenu = mainMenu.IsSubMenu ? mainMenu.Parent.AddSubMenuEx("Test", "Test") : mainMenu.AddSubMenuEx("Test", "Test");
             testMenu.Add("TestWall", new CheckBox("TestWall", true));
             testMenu.Add("TestPath", new CheckBox("TestPath", true));
             testMenu.Add("TestTracker", new CheckBox("TestTracker", false));
@@ -155,7 +158,7 @@ namespace ezEvade
         private void Game_OnGameLoad()
         {
             ConsolePrinter.Print("EvadeTester loaded");
-            menu.AddSubMenu("Test", "Test");
+            //menu.AddSubMenuEx("Test", "Test");
 
             //ConsolePrinter.Print("Ping:" + ObjectCache.gamePing);
             if (testMenu.Get<CheckBox>("ShowBuffs").CurrentValue)
@@ -498,9 +501,7 @@ namespace ezEvade
             {
                 if (myHero.IsDashing())
                 {
-
-                    var dashInfo = myHero.GetDashInfo();
-                    ConsolePrinter.Print("Dash Speed: " + dashInfo.Speed + " Dash dist: " + dashInfo.EndPos.Distance(dashInfo.StartPos));
+                    //ConsolePrinter.Print("Dash Speed: " + dashInfo.Speed + " Dash dist: " + dashInfo.EndPos.Distance(dashInfo.StartPos));
                 }
             }
 
@@ -511,51 +512,51 @@ namespace ezEvade
             //ConsolePrinter.Print("" + args.EventId);
         }
 
-        private void GameObject_OnFloatPropertyChange(GameObject obj, GameObjectFloatPropertyChangeEventArgs args)
-        {
-            //ConsolePrinter.Print(obj.Name);
+        //private void GameObject_OnFloatPropertyChange(GameObject obj, GameObjectFloatPropertyChangeEventArgs args)
+        //{
+        //    //ConsolePrinter.Print(obj.Name);
 
-            /*foreach (var sth in ObjectManager.Get<Obj_AI_Base>())
-            {
-                ConsolePrinter.Print(sth.Name);
+        //    /*foreach (var sth in ObjectManager.Get<Obj_AI_Base>())
+        //    {
+        //        ConsolePrinter.Print(sth.Name);
 
-            }*/
+        //    }*/
 
-            if (testMenu.Item("TestSpellEndTime").GetValue<bool>() == false)
-            {
-                return;
-            }
+        //    if (testMenu.Item("TestSpellEndTime").Cast<CheckBox>().CurrentValue == false)
+        //    {
+        //        return;
+        //    }
 
-            if (obj.Name == "RobotBuddy")
-            {
-                //Draw.RenderObjects.Add(new Draw.RenderPosition(obj.Position.To2D(), EvadeUtils.TickCount + 10));
-            }
+        //    if (obj.Name == "RobotBuddy")
+        //    {
+        //        //Draw.RenderObjects.Add(new Draw.RenderPosition(obj.Position.To2D(), EvadeUtils.TickCount + 10));
+        //    }
 
-            //ConsolePrinter.Print(obj.Name);
-
-
-            if (args.Property == "mHP" && args.OldValue > args.NewValue)
-            {
-                //ConsolePrinter.Print("Damage taken time: " + (EvadeUtils.TickCount - lastSpellCastTime));
-            }
-
-            if (!obj.IsMe)
-            {
-                return;
-            }
+        //    //ConsolePrinter.Print(obj.Name);
 
 
+        //    if (args.Property == "mHP" && args.OldValue > args.NewValue)
+        //    {
+        //        //ConsolePrinter.Print("Damage taken time: " + (EvadeUtils.TickCount - lastSpellCastTime));
+        //    }
 
-            if (args.Property != "mExp" && args.Property != "mGold" && args.Property != "mGoldTotal"
-                && args.Property != "mMP" && args.Property != "mPARRegenRate")
-            {
-                //ConsolePrinter.Print(args.Property + ": " + args.NewValue);
-            }
-        }
+        //    if (!obj.IsMe)
+        //    {
+        //        return;
+        //    }
+
+
+
+        //    if (args.Property != "mExp" && args.Property != "mGold" && args.Property != "mGoldTotal"
+        //        && args.Property != "mMP" && args.Property != "mPARRegenRate")
+        //    {
+        //        //ConsolePrinter.Print(args.Property + ": " + args.NewValue);
+        //    }
+        //}
 
         private void Game_OnDamage(AttackableUnit sender, AttackableUnitDamageEventArgs args)
         {
-            if (testMenu.Item("TestSpellEndTime").GetValue<bool>() == false)
+            if (!testMenu.Get<CheckBox>("TestSpellEndTime").CurrentValue)
             {
                 return;
             }
@@ -566,17 +567,17 @@ namespace ezEvade
             ConsolePrinter.Print("Damage taken time: " + (EvadeUtils.TickCount - lastSpellCastTime));
         }
 
-        private void GameObject_OnIntegerPropertyChange(GameObject obj, GameObjectIntegerPropertyChangeEventArgs args)
-        {
-            if (obj.IsMe)
-            {
-                if (args.Property != "mExp" && args.Property != "mGold" && args.Property != "mGoldTotal")
-                {
-                    ConsolePrinter.Print("Int" + args.Property + ": " + args.NewValue);
-                }
+        //private void GameObject_OnIntegerPropertyChange(GameObject obj, GameObjectIntegerPropertyChangeEventArgs args)
+        //{
+        //    if (obj.IsMe)
+        //    {
+        //        if (args.Property != "mExp" && args.Property != "mGold" && args.Property != "mGoldTotal")
+        //        {
+        //            ConsolePrinter.Print("Int" + args.Property + ": " + args.NewValue);
+        //        }
 
-            }
-        }
+        //    }
+        //}
 
         private void Game_OnIssueOrder(Obj_AI_Base hero, PlayerIssueOrderEventArgs args)
         {
@@ -599,7 +600,7 @@ namespace ezEvade
                 }
             }
 
-            if (testMenu.Item("TestPath").GetValue<bool>())
+            if (testMenu.Get<CheckBox>("TestPath").CurrentValue)
             {
                 var tPath = myHero.GetPath(args.TargetPosition);
                 Vector2 lastPoint = Vector2.Zero;
@@ -629,7 +630,7 @@ namespace ezEvade
 
             if (args.Order == GameObjectOrder.MoveTo)
             {
-                if (testMenu.Item("EvadeTesterPing").GetValue<bool>())
+                if (testMenu.Get<CheckBox>("EvadeTesterPing").CurrentValue)
                 {
                     ConsolePrinter.Print("Sending Path ClickTime: " + (EvadeUtils.TickCount - lastRightMouseClickTime));
                 }
@@ -702,17 +703,17 @@ namespace ezEvade
             lastWatchTimerTick = getWatchTimer;
         }
 
-        private void TestUnderTurret()
-        {
-            if (Game.CursorPos.To2D().IsUnderTurret())
-            {
-                Render.Circle.DrawCircle(Game.CursorPos, 50, Color.Red, 3);
-            }
-            else
-            {
-                Render.Circle.DrawCircle(Game.CursorPos, 50, Color.White, 3);
-            }
-        }
+        //private void TestUnderTurret()
+        //{
+        //    if (Game.CursorPos.To2D().IsUnderTurret())
+        //    {
+        //        Render.Circle.DrawCircle(Game.CursorPos, 50, Color.Red, 3);
+        //    }
+        //    else
+        //    {
+        //        Render.Circle.DrawCircle(Game.CursorPos, 50, Color.White, 3);
+        //    }
+        //}
 
         private void Drawing_OnDraw(EventArgs args)
         {
@@ -744,6 +745,7 @@ namespace ezEvade
                 {
                     Vector2 spellPos = spell.currentSpellPosition;
 
+
                     Render.Circle.DrawCircle(new Vector3(spellPos.X, spellPos.Y, myHero.Position.Z), spell.info.radius, Color.White, 3);
 
                     /*spellPos = spellPos + spell.direction * spell.info.projectileSpeed * (60 / 1000); //move the spellPos by 50 miliseconds forwards
@@ -753,7 +755,7 @@ namespace ezEvade
                 }
             }
 
-            if (testMenu.Item("TestHeroPos").GetValue<bool>())
+            if (testMenu.Get<CheckBox>("TestHeroPos").CurrentValue)
             {
                 var path = myHero.Path;
                 if (path.Length > 0)
@@ -765,27 +767,28 @@ namespace ezEvade
                     Render.Circle.DrawCircle(new Vector3(myHero.ServerPosition.X, myHero.ServerPosition.Y, myHero.ServerPosition.Z), ObjectCache.myHeroCache.boundingRadius, Color.White, 3);
 
                     var heroPos = Drawing.WorldToScreen(ObjectManager.Player.Position);
-                    var dimension = Drawing.GetTextExtent("Evade: ON");
+                    var dimension = Drawing.GetTextEntent("Evade: ON", 12);
                     Drawing.DrawText(heroPos.X - dimension.Width / 2, heroPos.Y, Color.Red, "" + (int)(heroPos2.Distance(heroPos1)));
 
                     Render.Circle.DrawCircle(new Vector3(circleRenderPos.X, circleRenderPos.Y, myHero.ServerPosition.Z), 10, Color.Red, 3);
                 }
             }
 
-            if (testMenu.Item("DrawHeroPos").GetValue<bool>())
+            if (testMenu.Get<CheckBox>("DrawHeroPos").CurrentValue)
             {
                 Render.Circle.DrawCircle(new Vector3(myHero.ServerPosition.X, myHero.ServerPosition.Y, myHero.ServerPosition.Z), ObjectCache.myHeroCache.boundingRadius, Color.White, 3);
             }
 
-            if (testMenu.Item("TestMoveTo").GetValue<KeyBind>().Active)
+
+            if (testMenu.Get<KeyBind>("TestMoveTo").CurrentValue)
             {
-                var keyBind = testMenu.Item("TestMoveTo").GetValue<KeyBind>();
-                testMenu.Item("TestMoveTo").SetValue(new KeyBind(keyBind.Key, KeyBindType.Toggle, false));
+                //var keyBind = testMenu.Get<KeyBind>("TestMoveTo"); TODO: ??
+                //testMenu.Item("TestMoveTo").SetValue(new KeyBind(keyBind.Key, KeyBindType.Toggle, false));
 
                 /*lastRightMouseClickTime = EvadeUtils.TickCount;
                 myHero.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos,false);*/
 
-                myHero.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
+                Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
 
                 var dir = (Game.CursorPos - myHero.Position).Normalized();
                 //var pos2 = myHero.Position - dir * Game.CursorPos.Distance(myHero.Position);
@@ -795,11 +798,11 @@ namespace ezEvade
 
                 //Console.WriteLine(myHero.BBox.Maximum.Distance(myHero.Position));
 
-                DelayAction.Add(20, () => myHero.IssueOrder(GameObjectOrder.MoveTo, pos2.To3D(), false));
+                DelayAction.Add(20, () => Player.IssueOrder(GameObjectOrder.MoveTo, pos2.To3D(), false));
                 //myHero.IssueOrder(GameObjectOrder.MoveTo, pos2, false);
             }
 
-            if (testMenu.Item("TestPath").GetValue<bool>())
+            if (testMenu.Get<CheckBox>("TestPath").CurrentValue)
             {
                 var tPath = myHero.GetPath(Game.CursorPos);
                 Vector2 lastPoint = Vector2.Zero;
@@ -813,7 +816,7 @@ namespace ezEvade
                 }
             }
 
-            if (testMenu.Item("TestPath").GetValue<bool>())
+            if (testMenu.Get<CheckBox>("TestPath").CurrentValue)
             {
                 var tPath = myHero.GetPath(Game.CursorPos);
                 Vector2 lastPoint = Vector2.Zero;
@@ -847,7 +850,7 @@ namespace ezEvade
                 }
             }
 
-            if (testMenu.Item("ShowBuffs").GetValue<bool>())
+            if (testMenu.Get<CheckBox>("ShowBuffs").CurrentValue)
             {
                 var target = myHero;
 
@@ -870,7 +873,7 @@ namespace ezEvade
 
                 foreach (var buff in buffs)
                 {
-                    if (buff.IsValidBuff())
+                    if (buff.IsValid())
                     {
                         Drawing.DrawText(10, height, Color.White, buff.Name);
                         height += 20;
@@ -880,7 +883,7 @@ namespace ezEvade
                 }
             }
 
-            if (testMenu.Item("TestTracker").GetValue<bool>())
+            if (testMenu.Get<CheckBox>("TestTracker").CurrentValue)
             {
                 foreach (KeyValuePair<int, ObjectTrackerInfo> entry in ObjectTracker.objTracker)
                 {
@@ -907,7 +910,7 @@ namespace ezEvade
                 }*/
             }
 
-            if (testMenu.Item("ShowMissileInfo").GetValue<bool>())
+            if (testMenu.Get<CheckBox>("ShowMissileInfo").CurrentValue)
             {
                 if (testMissile != null)
                 {
@@ -916,7 +919,7 @@ namespace ezEvade
                 }
             }
 
-            if (testMenu.Item("TestWall").GetValue<bool>())
+            if (testMenu.Get<CheckBox>("TestWall").CurrentValue)
             {
                 /*foreach (var posInfo in sortedBestPos)
                 {
@@ -959,7 +962,7 @@ namespace ezEvade
                         var cRadians = (2 * Math.PI / (curCircleChecks - 1)) * i; //check decimals
                         var pos = new Vector2((float)Math.Floor(heroPoint.X + curRadius * Math.Cos(cRadians)), (float)Math.Floor(heroPoint.Y + curRadius * Math.Sin(cRadians)));
 
-                        if (!EvadeHelper.CheckPathCollision(myHero, pos))
+                        if (EvadeHelper.CheckPathCollision(myHero, pos))
                         {
                             Render.Circle.DrawCircle(new Vector3(pos.X, pos.Y, myHero.Position.Z), (float)25, Color.White, 3);
                         }
