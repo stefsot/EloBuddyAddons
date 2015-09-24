@@ -12,11 +12,6 @@ namespace EzEvade
 {
     public static class Burrito
     {
-        public static bool IsOnScreen(this Vector2 p)
-        {
-            return p.X <= Drawing.Width && p.X >= 0 && p.Y <= Drawing.Height && p.Y >= 0;
-        }
-
         public static SpellSlot GetSpellSlot(this AIHeroClient unit, string name)
         {
             foreach (var spell in
