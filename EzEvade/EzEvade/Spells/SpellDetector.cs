@@ -59,13 +59,13 @@ namespace ezEvade
 
         public SpellDetector(Menu mainMenu)
         {
-            MissileClient.OnCreate += SpellMissile_OnCreate;
-            MissileClient.OnDelete += SpellMissile_OnDelete;
+            GameObject.OnCreate += SpellMissile_OnCreate;
+            GameObject.OnDelete += SpellMissile_OnDelete;
 
-            Obj_SpellMissile.OnCreate += SpellMissile_OnCreateOld;
-            Obj_SpellMissile.OnDelete += SpellMissile_OnDeleteOld;
+            //GameObject.OnCreate += SpellMissile_OnCreateOld;
+            //GameObject.OnDelete += SpellMissile_OnDeleteOld;
             
-            AIHeroClient.OnProcessSpellCast += Game_ProcessSpell;
+            Obj_AI_Base.OnProcessSpellCast += Game_ProcessSpell;
 
             Game.OnUpdate += Game_OnGameUpdate;
 
@@ -82,7 +82,7 @@ namespace ezEvade
             if (obj.GetType() != typeof(MissileClient) || !((MissileClient)obj).IsValidMissile())
                 return;
 
-            MissileClient missile = (MissileClient) obj;
+            var missile = (MissileClient) obj;
 
             SpellData spellData;
 
@@ -157,7 +157,7 @@ namespace ezEvade
             if (obj.GetType() != typeof(MissileClient) || !((MissileClient) obj).IsValidMissile())
                 return;
 
-            MissileClient missile = (MissileClient)obj;
+            var missile = (MissileClient)obj;
             //SpellData spellData;
 
             foreach (var spell in spells.Values.ToList().Where(
@@ -165,76 +165,6 @@ namespace ezEvade
             {
                 //Console.WriteLine("Distance: " + obj.Position.Distance(myHero.Position));
 
-                DelayAction.Add(1, () => DeleteSpell(spell.spellID));
-            }
-        }
-
-        private void SpellMissile_OnCreateOld(GameObject obj, EventArgs args)
-        {
-
-            if (obj.GetType() != typeof(MissileClient) || !((MissileClient) obj).IsValidMissile())
-                return;
-
-            Obj_SpellMissile missile = (Obj_SpellMissile)obj;
-
-            SpellData spellData;
-
-            if (missile.SpellCaster != null && missile.SpellCaster.Team != myHero.Team &&
-                missile.SData.Name != null && onMissileSpells.TryGetValue(missile.SData.Name, out spellData)
-                && missile.StartPosition != null && missile.EndPosition != null)
-            {
-
-                if (missile.StartPosition.Distance(myHero.Position) < spellData.range + 1000)
-                {
-                    var hero = missile.SpellCaster;
-
-                    if (hero.IsVisible)
-                    {
-                        if (spellData.usePackets)
-                        {
-                            CreateSpellData(hero, missile.StartPosition, missile.EndPosition, spellData, obj);
-                            return;
-                        }
-
-                        foreach (KeyValuePair<int, Spell> entry in spells)
-                        {
-                            Spell spell = entry.Value;
-
-                            var dir = (missile.EndPosition.To2D() - missile.StartPosition.To2D()).Normalized();
-
-                            if (spell.info.missileName == missile.SData.Name
-                                && spell.heroID == missile.SpellCaster.NetworkId
-                                && dir.AngleBetween(spell.direction) < 10)
-                            {
-                                if (spell.info.isThreeWay == false && spell.info.isSpecial == false)
-                                {
-                                    spell.spellObject = obj;
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (ObjectCache.menuCache.cache["DodgeFOWSpells"].Cast<CheckBox>().CurrentValue)
-                        {
-                            CreateSpellData(hero, missile.StartPosition, missile.EndPosition, spellData, obj);
-                        }
-                    }
-                }
-            }
-        }
-
-        private void SpellMissile_OnDeleteOld(GameObject obj, EventArgs args)
-        {
-            if (obj.GetType() != typeof(MissileClient) || !((MissileClient) obj).IsValidMissile())
-                return;
-
-            Obj_SpellMissile missile = (Obj_SpellMissile)obj;
-            //SpellData spellData;
-
-            foreach (var spell in spells.Values.ToList().Where(
-                    s => (s.spellObject != null && s.spellObject.NetworkId == obj.NetworkId))) //isAlive
-            {
                 DelayAction.Add(1, () => DeleteSpell(spell.spellID));
             }
         }
