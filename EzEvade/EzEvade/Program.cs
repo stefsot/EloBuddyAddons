@@ -10,7 +10,7 @@ namespace EzEvade
 
         static void Main(string[] args)
         {
-            evade = new Evade();
+            //evade = new Evade();
         }
     }
 }
