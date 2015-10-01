@@ -152,7 +152,7 @@ namespace EvadePlus
                 return;
             }
 
-            if (args.IsToggle || sender == null)
+            if (args.End.Distance(sender, true) < 10.Pow())
             {
                 return;
             }
