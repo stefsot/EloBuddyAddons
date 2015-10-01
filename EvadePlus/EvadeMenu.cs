@@ -40,11 +40,12 @@ namespace EvadePlus
             MainMenu.Add("skillshotActivationDelay", new Slider("Skillshot Activation Delay", 0, 0, 400));
             MainMenu.AddSeparator(10);
             MainMenu.Add("extraEvadeRange", new Slider("Extra Evade Range", 50, 0, 200));
-            MainMenu.Add("randomizeExtraEvadeRange", new CheckBox("Randomize Extra Evade Range"));
+            MainMenu.Add("randomizeExtraEvadeRange", new CheckBox("Randomize Extra Evade Range", false));
 
             // Set up skillshot menu
             var enemyChampions = HeroManager.Enemies.Select(obj => obj.ChampionName).ToArray();
-            var skillshots = SkillshotDatabase.Database.Where(s => enemyChampions.Contains(s.SpellData.ChampionName) || s.SpellData.ChampionName == "AllChampions").ToArray();
+            var skillshots =
+                SkillshotDatabase.Database.Where(s => enemyChampions.Contains(s.SpellData.ChampionName)).ToArray();
 
             SkillshotMenu = MainMenu.AddSubMenu("Skillshots");
             SkillshotMenu.AddLabel(string.Format("Skillshots Loaded {0}", skillshots.Length));
@@ -98,7 +99,7 @@ namespace EvadePlus
             ControlsMenu = MainMenu.AddSubMenu("Controls");
             ControlsMenu.AddGroupLabel("Controls");
             ControlsMenu.Add("enableEvade", new KeyBind("Enable Evade", true, KeyBind.BindTypes.PressToggle, 'M'));
-            ControlsMenu.Add("dodgeDangerousOnly", new KeyBind("Dodge Only Dangerous", false, KeyBind.BindTypes.HoldActive, 32));
+            ControlsMenu.Add("dodgeOnlyDangerous", new KeyBind("Dodge Only Dangerous", false, KeyBind.BindTypes.HoldActive));
         }
 
         private static EvadeSkillshot GetSkillshot(string s)

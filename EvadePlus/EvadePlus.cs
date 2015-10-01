@@ -25,7 +25,7 @@ namespace EvadePlus
 
         public bool DodgeDangerousOnly
         {
-            get { return EvadeMenu.ControlsMenu["dodgeDangerousOnly"].Cast<KeyBind>().CurrentValue; }
+            get { return EvadeMenu.ControlsMenu["dodgeOnlyDangerous"].Cast<KeyBind>().CurrentValue; }
         }
 
         public int ExtraEvadeRange
@@ -213,7 +213,7 @@ namespace EvadePlus
             }).ToArray();
             ClippedPolygons = Geometry.ClipPolygons(Polygons).ToPolygons();
         }
-
+        
         public bool IsPointSafe(Vector2 point)
         {
             return !ClippedPolygons.Any(p => p.IsInside(point));
