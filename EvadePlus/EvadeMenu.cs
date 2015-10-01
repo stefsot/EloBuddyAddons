@@ -44,7 +44,7 @@ namespace EvadePlus
 
             // Set up skillshot menu
             var enemyChampions = HeroManager.Enemies.Select(obj => obj.ChampionName).ToArray();
-            var skillshots = SkillshotDatabase.Database.Where(s => enemyChampions.Contains(s.SpellData.ChampionName)).ToArray();
+            var skillshots = SkillshotDatabase.Database.Where(s => enemyChampions.Contains(s.SpellData.ChampionName) || s.SpellData.ChampionName == "AllChampions").ToArray();
 
             SkillshotMenu = MainMenu.AddSubMenu("Skillshots");
             SkillshotMenu.AddLabel(string.Format("Skillshots Loaded {0}", skillshots.Length));
