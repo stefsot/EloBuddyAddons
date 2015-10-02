@@ -62,7 +62,7 @@ namespace EvadePlus
                 MenuSkillshots.Add(skillshotString, c);
 
                 SkillshotMenu.AddGroupLabel(c.DisplayText);
-                SkillshotMenu.Add(skillshotString + "/enable", new CheckBox("Enable"));
+                SkillshotMenu.Add(skillshotString + "/enable", new CheckBox("Dodge"));
                 SkillshotMenu.Add(skillshotString + "/draw", new CheckBox("Draw"));
 
                 var dangerous = new CheckBox("Dangerous", c.SpellData.IsDangerous);

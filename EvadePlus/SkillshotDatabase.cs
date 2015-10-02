@@ -83,7 +83,8 @@ namespace EvadePlus
                         Radius = 60,
                         MissileSpeed = 1550,
                         DangerValue = 3,
-                        MissileSpellName = "AhriSeduceMissile"
+                        MissileSpellName = "AhriSeduceMissile",
+                        IsDangerous = true
                     }
                 },
                 new LinearMissileSkillshot
@@ -128,7 +129,8 @@ namespace EvadePlus
                         Radius = 560,
                         MissileSpeed = 0,
                         DangerValue = 3,
-                        MissileSpellName = "CurseoftheSadMummy"
+                        MissileSpellName = "CurseoftheSadMummy",
+                        IsDangerous = true
                     }
                 },
                 new LinearMissileSkillshot
