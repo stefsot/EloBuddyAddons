@@ -583,7 +583,7 @@ namespace EvadePlus
             if (points.Count == 1)
             {
                 var walkTime = hero.WalkingTime(points[0]);
-                return walkTime <= evade.TotalTimeAvailable + 10 || walkTime*hero.MoveSpeed <= hero.BoundingRadius*2;
+                return walkTime <= evade.TotalTimeAvailable + 10 || walkTime*hero.MoveSpeed <= hero.BoundingRadius*1.5F;
             }
 
             return false;
@@ -611,7 +611,7 @@ namespace EvadePlus
                 if (evade.IsValid && evade.EnoughTime)
                 {
                     if (LastEvadeResult == null ||
-                        (LastEvadeResult.EvadePoint.Distance(evade.EvadePoint, true) > 250.Pow()))
+                        (LastEvadeResult.EvadePoint.Distance(evade.EvadePoint, true) > 300.Pow()))
                     {
                         LastEvadeResult = evade;
                     }

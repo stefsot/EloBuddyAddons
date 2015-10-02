@@ -963,7 +963,7 @@ namespace EvadePlus
                     SpellData = new SpellData
                     {
                         ChampionName = "Janna",
-                        SpellName = "HowlingGale",
+                        SpellName = "//HowlingGale",
                         Slot = SpellSlot.Q,
                         Delay = 0,
                         Range = 1700,
