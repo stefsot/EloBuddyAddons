@@ -31,7 +31,8 @@ namespace EvadePlus
             MainMenu.AddGroupLabel("General Settings");
             MainMenu.Add("fowDetection", new CheckBox("Enable FOW detection"));
             MainMenu.Add("processSpellDetection", new CheckBox("Enable Process Spell Detection"));
-            MainMenu.Add("limitDetectionRange", new CheckBox("Limit Detection Range"));
+            MainMenu.Add("limitDetectionRange", new CheckBox("Limit Spell Detection Range"));
+            MainMenu.Add("restorePosition", new CheckBox("Move to desired position after evade."));
             MainMenu.Add("serverBuffer", new Slider("Server Buffer", 30));
             MainMenu.AddSeparator();
             MainMenu.AddSeparator();
