@@ -87,9 +87,8 @@ namespace EvadePlus
             Skillshots = new EvadeSkillshot[] {};
             Polygons = new Geometry.Polygon[] {};
             ClippedPolygons = new List<Geometry.Polygon>();
-            StatusText = new Text("EvadePlus Enabled", new Font("Lucida Sans Unicode", 7.7F, FontStyle.Bold));
-            //Lucida Console, 9
-            StatusTextShadow = new Text("EvadePlus Enabled", new Font("Lucida Sans Unicode", 7.7F, FontStyle.Bold));
+            StatusText = new Text("EvadePlus Enabled", new Font("Calisto MT", 10F, FontStyle.Bold));
+            StatusTextShadow = new Text("EvadePlus Enabled", new Font("Calisto MT", 10F, FontStyle.Bold));
 
             SkillshotDetector = detector;
             SkillshotDetector.OnUpdateSkillshots += OnUpdateSkillshots;
