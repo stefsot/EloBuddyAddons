@@ -73,7 +73,7 @@ namespace EvadePlus
         public void AddSkillshot(EvadeSkillshot skillshot, bool isProcessSpell = false, bool triggerEvent = true)
         {
             if (LimitDetectionRange &&
-                skillshot.GetCurrentPosition().Distance(Player.Instance, true) > (2*skillshot.SpellData.Range).Pow())
+                skillshot.GetPosition().Distance(Player.Instance, true) > (2*skillshot.SpellData.Range).Pow())
             {
                 return;
             }
@@ -178,8 +178,8 @@ namespace EvadePlus
 
         private void GameObjectOnCreate(GameObject sender, EventArgs args)
         {
-            // if (Utils.GetTeam(sender) == Utils.PlayerTeam())
-            //Chat.Print("create {0} {1} {2} {3}", sender.Team, sender.GetType().ToString(), Utils.GetGameObjectName(sender), sender.Index);
+            //if (Utils.GetTeam(sender) == Utils.PlayerTeam())
+            //    Chat.Print("create {0} {1} {2} {3}", sender.Team, sender.GetType().ToString(), Utils.GetGameObjectName(sender), sender.Index);
 
             var skillshot =
                 SkillshotDatabase.Database.FirstOrDefault(
@@ -222,7 +222,7 @@ namespace EvadePlus
         private void GameObjectOnDelete(GameObject sender, EventArgs args)
         {
             //if (Utils.GetTeam(sender) == Utils.PlayerTeam())
-            //Chat.Print("delete {0} {1} {2} {3}", sender.Team, sender.GetType().ToString(), Utils.GetGameObjectName(sender), sender.Index);
+            //    Chat.Print("delete {0} {1} {2} {3}", sender.Team, sender.GetType().ToString(), Utils.GetGameObjectName(sender), sender.Index);
 
             foreach (
                 var c in DetectedSkillshots.Where(v => v.SpawnObject != null && v.SpawnObject.Index == sender.Index))

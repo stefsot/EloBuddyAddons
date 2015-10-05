@@ -90,10 +90,11 @@ namespace EvadePlus
             return (squared ? a*a : a)/segmentStart.Distance(segmentEnd, squared);
         }
 
-        public static bool IsInLineSegment(this Vector2 point, Vector2 segmentStart, Vector2 segmentEnd)
+        public static bool IsInLineSegment(this Vector2 point, Vector2 segmentStart, Vector2 segmentEnd, float tolerance = 0)
         {
             var d = segmentStart.Distance(segmentEnd, true);
-            return point.Distance(segmentEnd, true) <= d && point.Distance(segmentStart, true) <= d;
+            return point.Distance(segmentEnd, true) <= d + tolerance &&
+                   point.Distance(segmentStart, true) <= d + tolerance;
         }
 
         public static Geometry.Polygon ToPolygon(this List<Vector2> points)
@@ -217,8 +218,19 @@ namespace EvadePlus
 
         public static string GetGameObjectName(GameObject obj)
         {
-            var missile = obj as MissileClient;
-            return missile == null ? obj.Name : missile.SData.Name;
+            var type = obj.GetType();
+
+            if (type == typeof (MissileClient))
+            {
+                return (obj as MissileClient).SData.Name;
+            }
+
+            if (type == typeof (Obj_AI_Minion))
+            {
+                return (obj as Obj_AI_Minion).BaseSkinName;
+            }
+
+            return obj.Name;
         }
 
         public static GameObjectTeam GetTeam(GameObject obj)
@@ -235,19 +247,19 @@ namespace EvadePlus
             var d2 = end.To2D();
             var direction = (d1 - d2).Perpendicular().Normalized();
 
-            Drawing.DrawLine(Drawing.WorldToScreen((d1 + direction * halfWidth).To3DPlayer()),
-                Drawing.WorldToScreen((d2 + direction * halfWidth).To3DPlayer()), lineWidth, color);
-            Drawing.DrawLine(Drawing.WorldToScreen((d1 + direction * -halfWidth).To3DPlayer()),
-                Drawing.WorldToScreen((d2 + direction * -halfWidth).To3DPlayer()), lineWidth, color);
-            Drawing.DrawLine(Drawing.WorldToScreen((d1 + direction * halfWidth).To3DPlayer()),
-                Drawing.WorldToScreen((d1 + direction * -halfWidth).To3DPlayer()), lineWidth, color);
-            Drawing.DrawLine(Drawing.WorldToScreen((d2 + direction * halfWidth).To3DPlayer()),
-                Drawing.WorldToScreen((d2 + direction * -halfWidth).To3DPlayer()), lineWidth, color);
+            Drawing.DrawLine(Drawing.WorldToScreen((d1 + direction*halfWidth).To3DPlayer()),
+                Drawing.WorldToScreen((d2 + direction*halfWidth).To3DPlayer()), lineWidth, color);
+            Drawing.DrawLine(Drawing.WorldToScreen((d1 + direction*-halfWidth).To3DPlayer()),
+                Drawing.WorldToScreen((d2 + direction*-halfWidth).To3DPlayer()), lineWidth, color);
+            Drawing.DrawLine(Drawing.WorldToScreen((d1 + direction*halfWidth).To3DPlayer()),
+                Drawing.WorldToScreen((d1 + direction*-halfWidth).To3DPlayer()), lineWidth, color);
+            Drawing.DrawLine(Drawing.WorldToScreen((d2 + direction*halfWidth).To3DPlayer()),
+                Drawing.WorldToScreen((d2 + direction*-halfWidth).To3DPlayer()), lineWidth, color);
 
             if (drawStartLine)
                 Drawing.DrawLine(
-                    Drawing.WorldToScreen((d1 + direction * (halfWidth + Player.Instance.BoundingRadius)).To3DPlayer()),
-                    Drawing.WorldToScreen((d1 + direction * -(halfWidth + Player.Instance.BoundingRadius)).To3DPlayer()),
+                    Drawing.WorldToScreen((d1 + direction*(halfWidth + Player.Instance.BoundingRadius)).To3DPlayer()),
+                    Drawing.WorldToScreen((d1 + direction*-(halfWidth + Player.Instance.BoundingRadius)).To3DPlayer()),
                     lineWidth,
                     Color.LawnGreen);
 

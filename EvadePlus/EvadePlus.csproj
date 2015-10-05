@@ -60,16 +60,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CircularMissileSkillshot.cs" />
+    <Compile Include="SkillshotTypes\CircularMissileSkillshot.cs" />
     <Compile Include="EvadeMenu.cs" />
     <Compile Include="EvadePlus.cs" />
     <Compile Include="AutoPathing.cs" />
     <Compile Include="EvadeSpellManager.cs" />
-    <Compile Include="LinearMissileSkillshot.cs" />
+    <Compile Include="SkillshotTypes\LinearMissileSkillshot.cs" />
     <Compile Include="SkillshotDatabase.cs" />
     <Compile Include="EvadeSkillshot.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SkillshotTypes\SpecialTypes\SummonerMark.cs" />
     <Compile Include="SpellData.cs" />
     <Compile Include="SkillshotDetector.cs" />
     <Compile Include="Utils.cs" />
@@ -77,6 +78,7 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

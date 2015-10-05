@@ -28,10 +28,10 @@ namespace EvadePlus
 
         public string DisplayText
         {
-            get { return string.Format("{0} {1} - {2}", SpellData.ChampionName, SpellData.Slot, SpellData.SpellName); }
+            get { return string.Format("{0} {1} - {2}", SpellData.ChampionName, SpellData.Slot, SpellData.DisplayName); }
         }
 
-        public virtual Vector3 GetCurrentPosition()
+        public virtual Vector3 GetPosition()
         {
             return Vector3.Zero;
         }
@@ -91,8 +91,7 @@ namespace EvadePlus
 
         public override string ToString()
         {
-            return string.Format("{0}_{1}_{2}_{3}", SpellData.ChampionName, SpellData.SpellName,
-                SpellData.MissileSpellName, SpellData.Slot);
+            return string.Format("{0}_{1}_{2}", SpellData.ChampionName, SpellData.Slot, SpellData.DisplayName);
         }
     }
 }

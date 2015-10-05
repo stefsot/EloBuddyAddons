@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using EloBuddy.SDK;
 using EloBuddy.SDK.Menu;
@@ -32,8 +31,10 @@ namespace EvadePlus
             MainMenu.Add("fowDetection", new CheckBox("Enable FOW detection"));
             MainMenu.Add("processSpellDetection", new CheckBox("Enable Process Spell Detection"));
             MainMenu.Add("limitDetectionRange", new CheckBox("Limit Spell Detection Range"));
-            MainMenu.Add("restorePosition", new CheckBox("Move to desired position after evade."));
-            MainMenu.Add("serverBuffer", new Slider("Server Buffer", 30));
+            MainMenu.Add("recalculatePosition", new CheckBox("Allow recalculation of evade position", false));
+            MainMenu.Add("moveToInitialPosition", new CheckBox("Move to desired position after evade.", false));
+            MainMenu.Add("alwaysEvade", new CheckBox("Evade always, even when not enough time is available", false));
+            MainMenu.Add("serverTimeBuffer", new Slider("Server Time Buffer", 30));
             MainMenu.AddSeparator();
             MainMenu.AddSeparator();
 
@@ -44,12 +45,18 @@ namespace EvadePlus
             MainMenu.Add("randomizeExtraEvadeRange", new CheckBox("Randomize Extra Evade Range", false));
 
             // Set up skillshot menu
-            var enemyChampions = HeroManager.Enemies.Select(obj => obj.ChampionName).ToArray();
+            var heroes = HeroManager.Enemies;
+            var heroNames = heroes.Select(obj => obj.ChampionName).ToArray();
             var skillshots =
-                SkillshotDatabase.Database.Where(s => enemyChampions.Contains(s.SpellData.ChampionName)).ToArray();
+                SkillshotDatabase.Database.Where(s => heroNames.Contains(s.SpellData.ChampionName)).ToList();
+            skillshots.AddRange(
+                SkillshotDatabase.Database.Where(
+                    s =>
+                        s.SpellData.ChampionName == "AllChampions" &&
+                        heroes.Any(obj => obj.Spellbook.Spells.Select(c => c.Name).Contains(s.SpellData.SpellName))));
 
             SkillshotMenu = MainMenu.AddSubMenu("Skillshots");
-            SkillshotMenu.AddLabel(string.Format("Skillshots Loaded {0}", skillshots.Length));
+            SkillshotMenu.AddLabel(string.Format("Skillshots Loaded {0}", skillshots.Count));
             SkillshotMenu.AddSeparator();
 
             foreach (var c in skillshots)

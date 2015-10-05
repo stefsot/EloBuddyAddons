@@ -4,6 +4,7 @@ namespace EvadePlus
 {
     public class SpellData
     {
+        public string DisplayName { get; set; }
         public string SpellName { get; set; }
         public string MissileSpellName { get; set; }
         public SpellSlot Slot { get; set; }

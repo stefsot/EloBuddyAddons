@@ -6,7 +6,7 @@ using EloBuddy.SDK.Rendering;
 using SharpDX;
 using Color = System.Drawing.Color;
 
-namespace EvadePlus
+namespace EvadePlus.SkillshotTypes
 {
     public class CircularMissileSkillshot : EvadeSkillshot
     {
@@ -34,7 +34,7 @@ namespace EvadePlus
         private Circle PrimaryCircle;
         private Circle SecondaryCircle;
 
-        public override Vector3 GetCurrentPosition()
+        public override Vector3 GetPosition()
         {
             return Position;
         }
