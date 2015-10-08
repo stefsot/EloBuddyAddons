@@ -447,8 +447,7 @@ namespace EvadePlus
                 end = polPoints.First().Extend(end, -extraWidth);
             }
 
-            var ritoPath =
-                Player.Instance.GetPath(start.To3DWorld(), end.To3DWorld()).ToArray().ToVector2().ToList();
+            var ritoPath = Player.Instance.GetPath(end.To3DWorld(), true).ToArray().ToVector2().ToList(); //Player.Instance.GetPath(start.To3DWorld(), end.To3DWorld()).ToArray().ToVector2().ToList();
             var pathPoints = new List<Vector2>();
             var polygonDictionary = new Dictionary<Vector2, Geometry.Polygon>();
             for (var i = 0; i < ritoPath.Count - 1; i++)
@@ -471,7 +470,7 @@ namespace EvadePlus
             }
             ritoPath.RemoveAll(p => walkPolygons.Any(pol => pol.IsInside(p)));
             pathPoints.AddRange(ritoPath);
-            pathPoints.SortPath(start);
+            pathPoints.SortPath(Player.Instance.ServerPosition.To2D()); //start
 
             var path = new List<Vector2>();
 

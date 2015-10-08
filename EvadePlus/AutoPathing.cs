@@ -88,7 +88,7 @@ namespace EvadePlus
             if (path == null || path.Length == 0)
                 return;
 
-            path = CleanPath(path);
+            //path = CleanPath(path);
 
             Path = path;
             IsPathing = true;
