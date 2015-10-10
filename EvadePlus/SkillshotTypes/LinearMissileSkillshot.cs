@@ -127,12 +127,12 @@ namespace EvadePlus.SkillshotTypes
         {
             if (Missile == null)
             {
-                if (Environment.TickCount > TimeDetected + SpellData.Delay + 50)
+                if (Environment.TickCount > TimeDetected + SpellData.Delay + 250)
                     IsValid = false;
             }
             else
             {
-                if (Environment.TickCount > TimeDetected + 9000)
+                if (Environment.TickCount > TimeDetected + 6000)
                     IsValid = false;
             }
         }
