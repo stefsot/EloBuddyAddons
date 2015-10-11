@@ -28,6 +28,11 @@ namespace EvadePlus
 
         #region "Extensions"
 
+        public static bool IsWalking(this Obj_AI_Base unit)
+        {
+            return unit.Path.Length > 2;
+        }
+
         public static Vector3 Destination(this Obj_AI_Base unit)
         {
             return unit.Path.Last();

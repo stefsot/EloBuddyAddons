@@ -41,7 +41,7 @@ namespace EvadePlus
             MainMenu.AddGroupLabel("Humanizer");
             MainMenu.Add("skillshotActivationDelay", new Slider("Skillshot Activation Delay", 0, 0, 400));
             MainMenu.AddSeparator(10);
-            MainMenu.Add("extraEvadeRange", new Slider("Extra Evade Range", 50, 0, 200));
+            MainMenu.Add("extraEvadeRange", new Slider("Extra Evade Range", 50, 0, 100));
             MainMenu.Add("randomizeExtraEvadeRange", new CheckBox("Randomize Extra Evade Range", false));
 
             // Set up skillshot menu
