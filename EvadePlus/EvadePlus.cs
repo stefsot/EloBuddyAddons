@@ -121,6 +121,7 @@ namespace EvadePlus
 
         private void OnSkillshotDetected(EvadeSkillshot skillshot, bool isProcessSpell)
         {
+            //TODO: update
             if (skillshot.ToPolygon().IsInside(Player.Instance))
             {
                 LastEvadeResult = null;

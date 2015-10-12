@@ -223,16 +223,16 @@ namespace EvadePlus
 
         public static string GetGameObjectName(GameObject obj)
         {
-            var type = obj.GetType();
-
-            if (type == typeof (MissileClient))
+            var missile = obj as MissileClient;
+            if (missile != null)
             {
-                return (obj as MissileClient).SData.Name;
+                return missile.SData.Name;
             }
 
-            if (type == typeof (Obj_AI_Minion))
+            var minion = obj as Obj_AI_Minion;
+            if (minion != null)
             {
-                return (obj as Obj_AI_Minion).BaseSkinName;
+                return minion.BaseSkinName;
             }
 
             return obj.Name;
