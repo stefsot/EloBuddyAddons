@@ -14,7 +14,7 @@ namespace EvadePlus
         public static Menu DrawMenu { get; private set; }
         public static Menu ControlsMenu { get; private set; }
 
-        private static readonly Dictionary<string, EvadeSkillshot> MenuSkillshots =
+        public static readonly Dictionary<string, EvadeSkillshot> MenuSkillshots =
             new Dictionary<string, EvadeSkillshot>();
 
         public static void CreateMenu()

@@ -181,39 +181,43 @@ namespace EvadePlus
             //if (Utils.GetTeam(sender) == Utils.PlayerTeam())
             //    Chat.Print("create {0} {1} {2} {3}", sender.Team, sender.GetType().ToString(), Utils.GetGameObjectName(sender), sender.Index);
 
-            var skillshot =
-                SkillshotDatabase.Database.FirstOrDefault(
-                    evadeSkillshot => evadeSkillshot.SpellData.MissileSpellName == Utils.GetGameObjectName(sender));
-
-            if (skillshot != null)
+            if (!(sender is Obj_GeneralParticleEmitter))
             {
-                var nSkillshot = skillshot.NewInstance();
-                nSkillshot.SkillshotDetector = this;
-                nSkillshot.SpawnObject = sender;
-                nSkillshot.Team = Utils.GetTeam(sender);
-                nSkillshot.OnCreate(sender);
+                var skillshot =
+                    EvadeMenu.MenuSkillshots.Values.FirstOrDefault(
+                        evadeSkillshot => evadeSkillshot.SpellData.MissileSpellName == Utils.GetGameObjectName(sender));
 
-                if (IsValidTeam(nSkillshot.Team) && (EnableFoWDetection || !nSkillshot.IsFromFow()))
+                if (skillshot != null)
                 {
-                    var triggerEvent = true;
+                    var nSkillshot = skillshot.NewInstance();
+                    nSkillshot.SkillshotDetector = this;
+                    nSkillshot.SpawnObject = sender;
+                    nSkillshot.Team = Utils.GetTeam(sender);
+                    nSkillshot.OnCreate(sender);
 
-                    if (sender.GetType() == typeof (MissileClient))
+                    if (IsValidTeam(nSkillshot.Team) && (EnableFoWDetection || !nSkillshot.IsFromFow()))
                     {
-                        var missile = (sender as MissileClient);
-                        var castSkillshot =
-                            DetectedSkillshots.FirstOrDefault(
-                                c => c.Caster != null && c.Caster.IdEquals(missile.SpellCaster));
-                        if (castSkillshot != null)
-                        {
-                            nSkillshot.TimeDetected = castSkillshot.TimeDetected;
-                            nSkillshot.IsActive = castSkillshot.IsActive;
-                            triggerEvent = false;
-                        }
-                    }
+                        var triggerEvent = true;
 
-                    AddSkillshot(nSkillshot, false, triggerEvent);
+                        if (sender is MissileClient)
+                        {
+                            var missile = (sender as MissileClient);
+                            var castSkillshot =
+                                DetectedSkillshots.FirstOrDefault(
+                                    c => c.Caster != null && c.Caster.IdEquals(missile.SpellCaster));
+                            if (castSkillshot != null)
+                            {
+                                nSkillshot.TimeDetected = castSkillshot.TimeDetected;
+                                nSkillshot.IsActive = castSkillshot.IsActive;
+                                triggerEvent = false;
+                            }
+                        }
+
+                        AddSkillshot(nSkillshot, false, triggerEvent);
+                    }
                 }
             }
+
 
             foreach (var c in DetectedSkillshots)
                 c.OnCreateObject(sender);
