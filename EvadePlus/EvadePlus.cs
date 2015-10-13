@@ -612,7 +612,7 @@ namespace EvadePlus
             if (points.Count == 1)
             {
                 var walkTime = hero.WalkingTime(points[0]);
-                return walkTime <= evade.TotalTimeAvailable;
+                return walkTime <= evade.TotalTimeAvailable - 130;
             }
 
             return false;
