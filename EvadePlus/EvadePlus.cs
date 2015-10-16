@@ -155,6 +155,11 @@ namespace EvadePlus
 
         private void PlayerOnIssueOrder(Obj_AI_Base sender, PlayerIssueOrderEventArgs args)
         {
+            if (!sender.IsMe)
+            {
+                return;
+            }
+
             if (args.Order == GameObjectOrder.AttackUnit)
             {
                 LastIssueOrderPos =
