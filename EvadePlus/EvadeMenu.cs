@@ -45,7 +45,7 @@ namespace EvadePlus
             MainMenu.Add("randomizeExtraEvadeRange", new CheckBox("Randomize Extra Evade Range", false));
 
             // Set up skillshot menu
-            var heroes = HeroManager.Enemies;
+            var heroes = EntityManager.Heroes.Enemies;
             var heroNames = heroes.Select(obj => obj.ChampionName).ToArray();
             var skillshots =
                 SkillshotDatabase.Database.Where(s => heroNames.Contains(s.SpellData.ChampionName)).ToList();
