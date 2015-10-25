@@ -48,12 +48,14 @@ namespace EvadePlus
 
         private static void OnDraw(EventArgs args)
         {
-            if (Path == null || !IsPathing)
+            if (Path == null || !IsPathing || EvadeMenu.DrawMenu["disableAllDrawings"].Cast<CheckBox>().CurrentValue)
+            {
                 return;
+            }
 
             if (EvadeMenu.DrawMenu["drawPath"].Cast<CheckBox>().CurrentValue)
             {
-                Utils.DrawPath(Path, Color.Aqua, 3);
+                Utils.DrawPath(Path, Color.Aqua, 2);
             }
         }
 

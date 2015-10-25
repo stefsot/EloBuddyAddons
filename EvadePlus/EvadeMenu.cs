@@ -33,7 +33,6 @@ namespace EvadePlus
             MainMenu.Add("limitDetectionRange", new CheckBox("Limit Spell Detection Range"));
             MainMenu.Add("recalculatePosition", new CheckBox("Allow recalculation of evade position", false));
             MainMenu.Add("moveToInitialPosition", new CheckBox("Move to desired position after evade.", false));
-            MainMenu.Add("alwaysEvade", new CheckBox("Evade always, even when not enough time is available", false));
             MainMenu.Add("serverTimeBuffer", new Slider("Server Time Buffer", 30));
             MainMenu.AddSeparator();
             MainMenu.AddSeparator();
@@ -97,6 +96,7 @@ namespace EvadePlus
             // Set up draw menu
             DrawMenu = MainMenu.AddSubMenu("Drawings");
             DrawMenu.AddGroupLabel("Evade Drawings");
+            DrawMenu.Add("disableAllDrawings", new CheckBox("Disable All Drawings", false));
             DrawMenu.Add("drawEvadePoint", new CheckBox("Draw Evade Point"));
             DrawMenu.Add("drawEvadeStatus", new CheckBox("Draw Evade Status"));
             DrawMenu.Add("drawDangerPolygon", new CheckBox("Draw Danger Polygon", false));

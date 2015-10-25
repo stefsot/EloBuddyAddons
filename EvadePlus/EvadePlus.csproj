@@ -60,6 +60,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PathFinding.cs" />
     <Compile Include="SkillshotTypes\CircularMissileSkillshot.cs" />
     <Compile Include="EvadeMenu.cs" />
     <Compile Include="EvadePlus.cs" />

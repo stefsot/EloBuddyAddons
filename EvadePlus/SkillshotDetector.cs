@@ -29,7 +29,7 @@ namespace EvadePlus
 
         #endregion
 
-        public DetectionTeam TeamDetect;
+        public DetectionTeam Detection;
 
         public readonly List<EvadeSkillshot> DetectedSkillshots = new List<EvadeSkillshot>();
 
@@ -58,9 +58,9 @@ namespace EvadePlus
             get { return EvadeMenu.MainMenu["processSpellDetection"].Cast<CheckBox>().CurrentValue; }
         }
 
-        public SkillshotDetector(DetectionTeam teamDetect = DetectionTeam.EnemyTeam)
+        public SkillshotDetector(DetectionTeam detection = DetectionTeam.EnemyTeam)
         {
-            TeamDetect = teamDetect;
+            Detection = detection;
 
             Game.OnTick += OnTick;
             GameObject.OnCreate += GameObjectOnCreate;
@@ -98,7 +98,7 @@ namespace EvadePlus
             if (team == GameObjectTeam.Unknown)
                 return true;
 
-            switch (TeamDetect)
+            switch (Detection)
             {
                 case DetectionTeam.AllyTeam:
                     return team.IsAlly();
@@ -117,11 +117,14 @@ namespace EvadePlus
         {
             foreach (var skillshot in DetectedSkillshots.Where(v => !v.IsValid))
             {
-                if (OnSkillshotDeleted != null)
-                    OnSkillshotDeleted(skillshot);
+                if (!skillshot.CastComplete)
+                {
+                    if (OnSkillshotDeleted != null)
+                        OnSkillshotDeleted(skillshot);
 
-                if (OnUpdateSkillshots != null)
-                    OnUpdateSkillshots(skillshot, true, false);
+                    if (OnUpdateSkillshots != null)
+                        OnUpdateSkillshots(skillshot, true, false);
+                }
 
                 skillshot.OnDispose();
             }
@@ -198,17 +201,19 @@ namespace EvadePlus
                     if (IsValidTeam(nSkillshot.Team) && (EnableFoWDetection || !nSkillshot.IsFromFow()))
                     {
                         var triggerEvent = true;
+                        var missile = (sender as MissileClient);
 
-                        if (sender is MissileClient)
+                        if (missile != null)
                         {
-                            var missile = (sender as MissileClient);
                             var castSkillshot =
                                 DetectedSkillshots.FirstOrDefault(
-                                    c => c.Caster != null && c.Caster.IdEquals(missile.SpellCaster));
+                                    c => c.Caster != null && c.Caster.IndexEquals(missile.SpellCaster));
+
                             if (castSkillshot != null)
                             {
                                 nSkillshot.TimeDetected = castSkillshot.TimeDetected;
                                 nSkillshot.IsActive = castSkillshot.IsActive;
+                                castSkillshot.CastComplete = true;
                                 triggerEvent = false;
                             }
                         }
@@ -229,7 +234,7 @@ namespace EvadePlus
             //    Chat.Print("delete {0} {1} {2} {3}", sender.Team, sender.GetType().ToString(), Utils.GetGameObjectName(sender), sender.Index);
 
             foreach (
-                var c in DetectedSkillshots.Where(v => v.SpawnObject != null && v.SpawnObject.Index == sender.Index))
+                var c in DetectedSkillshots.Where(v => v.SpawnObject != null && v.SpawnObject.IndexEquals(sender)))
             {
                 if (c.OnDelete(sender))
                     c.IsValid = false;
@@ -251,7 +256,7 @@ namespace EvadePlus
                 foreach (
                     var c in
                         DetectedSkillshots.Where(
-                            v => v.SpawnObject == null && v.Caster != null && v.Caster.IdEquals(sender)))
+                            v => v.SpawnObject == null && v.Caster != null && v.Caster.IndexEquals(sender)))
                 {
                     c.IsValid = false;
                 }

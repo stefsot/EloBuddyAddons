@@ -48,9 +48,9 @@ namespace EvadePlus
             get { return EvadeMenu.MainMenu["moveToInitialPosition"].Cast<CheckBox>().CurrentValue; }
         }
 
-        public bool AlwaysEvade
+        public bool DisableDrawings
         {
-            get { return true; } //return EvadeMenu.MainMenu["alwaysEvade"].Cast<CheckBox>().CurrentValue;
+            get { return EvadeMenu.DrawMenu["disableAllDrawings"].Cast<CheckBox>().CurrentValue; }
         }
 
         public bool DrawEvadePoint
@@ -70,10 +70,11 @@ namespace EvadePlus
 
         public int IssueOrderTickLimit
         {
-            get { return 200; }
+            get { return 90; }
         }
 
         public SkillshotDetector SkillshotDetector { get; private set; }
+        public PathFinding PathFinding { get; private set; }
 
         public EvadeSkillshot[] Skillshots { get; private set; }
         public Geometry.Polygon[] Polygons { get; private set; }
@@ -93,6 +94,7 @@ namespace EvadePlus
             Skillshots = new EvadeSkillshot[] {};
             Polygons = new Geometry.Polygon[] {};
             ClippedPolygons = new List<Geometry.Polygon>();
+            PathFinding = new PathFinding(this);
             StatusText = new Text("EvadePlus Enabled", new Font("Calisto MT", 10F, FontStyle.Bold));
             StatusTextShadow = new Text("EvadePlus Enabled", new Font("Calisto MT", 10F, FontStyle.Bold));
 
@@ -208,6 +210,11 @@ namespace EvadePlus
 
         private void OnDraw(EventArgs args)
         {
+            if (DisableDrawings)
+            {
+                return;
+            }
+
             if (DrawEvadePoint && LastEvadeResult != null)
             {
                 if (LastEvadeResult.IsValid && LastEvadeResult.EnoughTime && !LastEvadeResult.Expired())
@@ -370,19 +377,9 @@ namespace EvadePlus
 
             if (!segments.Any()) //not enough time
             {
-                var polPoints =
-                    polygons.Select(pol => pol.ToDetailedPolygon())
-                        .SelectMany(pol => pol.Points)
-                        .OrderByDescending(p => p.Distance(playerPos, true));
-
-                if (polPoints.Any())
-                {
-                    var point = polPoints.Last();
-                    return new EvadeResult(this, point, anchor, maxTime, time,
-                        point.Distance(playerPos, true) <= (moveRadius + 10).Pow());
-                }
-
-                return new EvadeResult(this, playerPos, anchor, maxTime, time, false);
+                var point = GetClosestPoint(polygons, playerPos);
+                return new EvadeResult(this, point, anchor, maxTime, time,
+                    point.Distance(playerPos, true) <= (moveRadius + 10).Pow());
             }
 
             const int maxdist = 1500;
@@ -417,176 +414,21 @@ namespace EvadePlus
 
             if (!points.Any())
             {
-                return new EvadeResult(this, Vector2.Zero, anchor, maxTime, time, true);
+                return new EvadeResult(this, GetClosestPoint(polygons, playerPos), anchor, maxTime, time, true);
             }
 
             var evadePoint = points.OrderByDescending(p => p.Distance(anchor) + p.Distance(playerPos)).Last();
             return new EvadeResult(this, evadePoint, anchor, maxTime, time, true);
         }
 
-        public Vector2[] GetPath(Vector2 start, Vector2 end)
+        public Vector2 GetClosestPoint(Geometry.Polygon[] polygons, Vector2 from)
         {
-            const int extraWidth = 50;
-            var walkPolygons = Geometry.ClipPolygons(Skillshots.Select(c => c.ToPolygon(extraWidth))).ToPolygons();
+            var polPoints =
+                polygons.Select(pol => pol.ToDetailedPolygon())
+                    .SelectMany(pol => pol.Points)
+                    .OrderByDescending(p => p.Distance(from, true));
 
-            //if (walkPolygons.Any(pol => pol.IsInside(start)))
-            //{
-            //    Chat.Print("start");
-            //    var polPoints =
-            //        Geometry.ClipPolygons(
-            //            SkillshotDetector.DetectedSkillshots.Where(c => c.IsValid)
-            //                .Select(c => c.ToPolygon(extraWidth))
-            //                .ToList())
-            //            .ToPolygons()
-            //            .Where(pol => pol.IsInside(start))
-            //            .SelectMany(pol => pol.Points)
-            //            .ToList();
-            //    polPoints.Sort((p1, p2) => p1.Distance(start, true).CompareTo(p2.Distance(start, true)));
-            //    start = polPoints.First().Extend(start, -150);
-            //}
-
-            if (walkPolygons.Any(pol => pol.IsInside(end)))
-            {
-                var polPoints =
-                    Geometry.ClipPolygons(
-                        SkillshotDetector.DetectedSkillshots.Where(c => c.IsValid)
-                            .Select(c => c.ToPolygon(extraWidth))
-                            .ToList())
-                        .ToPolygons()
-                        .Where(pol => pol.IsInside(end))
-                        .SelectMany(pol => pol.Points)
-                        .ToList();
-                polPoints.Sort((p1, p2) => p1.Distance(end, true).CompareTo(p2.Distance(end, true)));
-                end = polPoints.First().Extend(end, -extraWidth);
-            }
-
-            var ritoPath = Player.Instance.GetPath(end.To3DWorld(), true).ToArray().ToVector2().ToList();
-            var pathPoints = new List<Vector2>();
-            var polygonDictionary = new Dictionary<Vector2, Geometry.Polygon>();
-            for (var i = 0; i < ritoPath.Count - 1; i++)
-            {
-                var lineStart = ritoPath[i];
-                var lineEnd = ritoPath[i + 1];
-
-                foreach (var pol in walkPolygons)
-                {
-                    var intersectionPoints = pol.GetIntersectionPointsWithLineSegment(lineStart, lineEnd);
-                    foreach (var p in intersectionPoints)
-                    {
-                        if (!polygonDictionary.ContainsKey(p))
-                        {
-                            polygonDictionary.Add(p, pol);
-                            pathPoints.Add(p);
-                        }
-                    }
-                }
-            }
-            ritoPath.RemoveAll(p => walkPolygons.Any(pol => pol.IsInside(p)));
-            pathPoints.AddRange(ritoPath);
-            pathPoints.SortPath(Player.Instance.ServerPosition.To2D()); //start
-
-            var path = new List<Vector2>();
-
-            while (pathPoints.Count > 0)
-            {
-                if (pathPoints.Count == 1)
-                {
-                    path.Add(pathPoints[0]);
-                    break;
-                }
-
-                var current = pathPoints[0];
-                var next = pathPoints[1];
-
-                Geometry.Polygon pol1;
-                Geometry.Polygon pol2;
-
-                if (polygonDictionary.TryGetValue(current, out pol1) && polygonDictionary.TryGetValue(next, out pol2) &&
-                    pol1.Equals(pol2))
-                {
-                    var detailedPolygon = pol1.ToDetailedPolygon();
-                    detailedPolygon.Points.Sort(
-                        (p1, p2) => p1.Distance(current, true).CompareTo(p2.Distance(current, true)));
-                    current = detailedPolygon.Points.First();
-
-                    detailedPolygon.Points.Sort((p1, p2) => p1.Distance(next, true).CompareTo(p2.Distance(next, true)));
-                    next = detailedPolygon.Points.First();
-
-                    detailedPolygon = pol1.ToDetailedPolygon();
-                    var index = detailedPolygon.Points.FindIndex(p => p == current);
-                    var linkedList = new LinkedList<Vector2>(detailedPolygon.Points, index);
-
-                    var nextPath = new List<Vector2>();
-                    var previousPath = new List<Vector2>();
-                    var nextLength = 0F;
-                    var previousLength = 0F;
-                    var nextWall = false;
-                    var previousWall = false;
-
-                    while (true)
-                    {
-                        var c = linkedList.Next();
-
-                        if (c.IsWall())
-                        {
-                            nextWall = true;
-                            break;
-                        }
-
-                        nextPath.Add(c);
-
-                        if (nextPath.Count > 1)
-                            nextLength += nextPath[nextPath.Count - 2].Distance(c, true);
-
-                        if (c == next)
-                            break;
-                    }
-
-                    linkedList.Index = index;
-                    while (true)
-                    {
-                        var c = linkedList.Previous();
-
-                        if (c.IsWall())
-                        {
-                            previousWall = true;
-                            break;
-                        }
-
-                        previousPath.Add(c);
-
-                        if (previousPath.Count > 1)
-                            previousLength += previousPath[previousPath.Count - 2].Distance(c, true);
-
-                        if (c == next)
-                            break;
-                    }
-
-                    var shortest = nextWall && previousWall
-                        ? (nextLength > previousLength ? nextPath : previousPath)
-                        : (nextWall || previousWall
-                            ? (nextWall ? previousPath : nextPath)
-                            : nextLength < previousLength ? nextPath : previousPath);
-                    path.AddRange(shortest);
-
-                    if (previousWall && nextWall)
-                        break;
-                }
-                else
-                {
-                    path.Add(current);
-                    path.Add(next);
-                }
-
-                pathPoints.RemoveRange(0, 2);
-            }
-
-            if (path.Count() > 1)
-            {
-                path.RemoveAt(0);
-            }
-
-            return path.ToArray();
+            return !polPoints.Any() ? Vector2.Zero : polPoints.Last();
         }
 
         public bool IsHeroPathSafe(EvadeResult evade, Vector3[] desiredPath, AIHeroClient hero = null)
@@ -617,7 +459,7 @@ namespace EvadePlus
             if (points.Count == 1)
             {
                 var walkTime = hero.WalkingTime(points[0]);
-                return walkTime <= evade.TotalTimeAvailable - 130;
+                return walkTime <= evade.TimeAvailable;
             }
 
             return false;
@@ -625,13 +467,13 @@ namespace EvadePlus
 
         public bool MoveTo(Vector2 point, bool limit = true)
         {
-            //if (limit && EvadeIssurOrderTime + IssueOrderTickLimit > Environment.TickCount)
-            //{
-            //    return false;
-            //}
+            if (limit && EvadeIssurOrderTime + IssueOrderTickLimit > Environment.TickCount)
+            {
+                return false;
+            }
 
-            Player.IssueOrder(GameObjectOrder.MoveTo, point.To3DWorld(), false);
             EvadeIssurOrderTime = Environment.TickCount;
+            Player.IssueOrder(GameObjectOrder.MoveTo, point.To3DWorld(), false);
             return true;
         }
 
@@ -672,34 +514,29 @@ namespace EvadePlus
                 {
                     if (!evade.EnoughTime && LastEvadeResult == null && !IsHeroPathSafe(evade, desiredPath))
                     {
-                        var result = EvadeSpellManager.ProcessFlash(this);
-                        if (!result && AlwaysEvade && evade.IsValid)
-                        {
-                            MoveTo(evade.WalkPoint);
-                        }
-
-                        return result;
+                        return EvadeSpellManager.ProcessFlash(this);
                     }
                 }
 
                 if (LastEvadeResult != null && !IsHeroPathSafe(evade, desiredPath))
                 {
-                    if (!hero.IsMovingTowards(LastEvadeResult.WalkPoint) ||
-                        EvadeIssurOrderTime + IssueOrderTickLimit <= Environment.TickCount)
+                    if (!hero.IsMovingTowards(LastEvadeResult.WalkPoint))
                     {
                         AutoPathing.StopPath();
                         MoveTo(LastEvadeResult.WalkPoint, false);
+                        return true;
                     }
                 }
-
-                return true;
             }
             else if (!IsPathSafe(hero.RealPath()) || (desiredPath != null && !IsPathSafe(desiredPath)))
             {
-                var path = GetPath(hero.Position.To2D(), LastIssueOrderPos);
+                var path = PathFinding.GetPath(hero.Position.To2D(), LastIssueOrderPos);
                 if (path.Length > 0 && AutoPathing.Destination.Distance(path.Last(), true) > 50.Pow())
                 {
-                    AutoPathing.DoPath(path);
+                    if (IsPathSafe(path))
+                    {
+                        AutoPathing.DoPath(path);
+                    }
                 }
 
                 LastEvadeResult = null;
@@ -736,7 +573,7 @@ namespace EvadePlus
             {
                 get
                 {
-                    var walkPoint = EvadePoint.Extend(PlayerPos, -120);
+                    var walkPoint = EvadePoint.Extend(PlayerPos, -60);
                     var newPoint = walkPoint.Extend(PlayerPos, -ExtraRange);
                     if (Evade.IsPointSafe(newPoint))
                     {

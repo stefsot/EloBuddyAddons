@@ -23,6 +23,6 @@ namespace EvadePlus
         public SpellData()
         {
             AddHitbox = true;
-        }
+        } 
     }
 }
