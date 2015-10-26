@@ -1043,6 +1043,40 @@ namespace EvadePlus
                         MissileSpellName = "HecarimUlt"
                     }
                 },
+                new LinearMissileSkillshot
+                {
+                    SpellData = new SpellData
+                    {
+                        DisplayName = "Hextech Micro-Rockets",
+                        ChampionName = "Heimerdinger",
+                        SpellName = "disabled/HeimerdingerW",
+                        Slot = SpellSlot.W,
+                        Delay = 250,
+                        Range = 1500,
+                        Radius = 70,
+                        MissileSpeed = 1800,
+                        DangerValue = 2,
+                        IsDangerous = false,
+                        MissileSpellName = "HeimerdingerWAttack2"
+                    }
+                },
+                new LinearMissileSkillshot
+                {
+                    SpellData = new SpellData
+                    {
+                        DisplayName = "Hextech Micro-Rockets Ult",
+                        ChampionName = "Heimerdinger",
+                        SpellName = "disabled/HeimerdingerW",
+                        Slot = SpellSlot.W,
+                        Delay = 250,
+                        Range = 1500,
+                        Radius = 70,
+                        MissileSpeed = 1800,
+                        DangerValue = 2,
+                        IsDangerous = false,
+                        MissileSpellName = "HeimerdingerWAttack2Ult"
+                    }
+                },
                 new CircularMissileSkillshot
                 {
                     SpellData = new SpellData
@@ -1058,6 +1092,23 @@ namespace EvadePlus
                         DangerValue = 2,
                         IsDangerous = false,
                         MissileSpellName = "HeimerdingerESpell"
+                    }
+                },
+                new CircularMissileSkillshot
+                {
+                    SpellData = new SpellData
+                    {
+                        DisplayName = "CH-2 Electron Storm Grenade Ult",
+                        ChampionName = "Heimerdinger",
+                        SpellName = "disabled/HeimerdingerE",
+                        Slot = SpellSlot.E,
+                        Delay = 325,
+                        Range = 925,
+                        Radius = 135,
+                        MissileSpeed = 1750,
+                        DangerValue = 2,
+                        IsDangerous = false,
+                        MissileSpellName = "heimerdingerespell_ult"
                     }
                 },
                 new LinearMissileSkillshot
