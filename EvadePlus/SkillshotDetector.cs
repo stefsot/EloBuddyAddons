@@ -267,6 +267,11 @@ namespace EvadePlus
 
         private void OnDraw(EventArgs args)
         {
+            if (EvadeMenu.DrawMenu["disableAllDrawings"].Cast<CheckBox>().CurrentValue)
+            {
+                return;
+            }
+
             foreach (var c in DetectedSkillshots)
                 if (EvadeMenu.IsSkillshotDrawingEnabled(c))
                     c.OnDraw();

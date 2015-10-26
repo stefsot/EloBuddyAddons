@@ -153,6 +153,11 @@ namespace EvadePlus
             {
                 MoveTo(LastEvadeResult.WalkPoint);
             }
+
+            if (IsHeroInDanger() && LastEvadeResult == null)
+            {
+                DoEvade();
+            }
         }
 
         private void PlayerOnIssueOrder(Obj_AI_Base sender, PlayerIssueOrderEventArgs args)
@@ -179,28 +184,28 @@ namespace EvadePlus
             switch (args.Order)
             {
                 case GameObjectOrder.Stop:
-                    if (DoEvade())
+                    if (DoEvade(null, args))
                     {
                         args.Process = false;
                     }
                     break;
 
                 case GameObjectOrder.HoldPosition:
-                    if (DoEvade())
+                    if (DoEvade(null, args))
                     {
                         args.Process = false;
                     }
                     break;
 
                 case GameObjectOrder.AttackUnit:
-                    if (DoEvade())
+                    if (DoEvade(null, args))
                     {
                         args.Process = false;
                     }
                     break;
 
                 default:
-                    if (DoEvade(Player.Instance.GetPath(LastIssueOrderPos.To3DWorld(), true)))
+                    if (DoEvade(Player.Instance.GetPath(LastIssueOrderPos.To3DWorld(), true), args))
                     {
                         args.Process = false;
                     }
@@ -246,7 +251,7 @@ namespace EvadePlus
                         Geometry.ClipPolygons(SkillshotDetector.ActiveSkillshots.Select(c => c.ToPolygon()))
                             .ToPolygons())
                 {
-                    pol.DrawPolygon(Color.Red, 3);
+                    pol.DrawPolygon(Color.Red, 2);
                 }
             }
         }
@@ -482,7 +487,7 @@ namespace EvadePlus
             return MoveTo(point.To2D(), limit);
         }
 
-        public bool DoEvade(Vector3[] desiredPath = null)
+        public bool DoEvade(Vector3[] desiredPath = null, PlayerIssueOrderEventArgs args = null)
         {
             if (!EvadeEnabled || Player.Instance.IsDead)
             {
@@ -492,6 +497,14 @@ namespace EvadePlus
             }
 
             var hero = Player.Instance;
+
+            if (args != null && args.Order == GameObjectOrder.AttackUnit)
+            {
+                if (!hero.IsInAutoAttackRange((AttackableUnit) args.Target))
+                {
+                    desiredPath = hero.GetPath(args.Target.Position, true);
+                }
+            }
 
             if (IsHeroInDanger(hero))
             {

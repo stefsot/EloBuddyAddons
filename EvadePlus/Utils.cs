@@ -28,6 +28,11 @@ namespace EvadePlus
 
         #region "Extensions"
 
+        public static float HitBoxRadius(this Obj_AI_Base unit)
+        {
+            return unit.BoundingRadius/2;
+        }
+
         public static bool IndexEquals(this GameObject obj1, GameObject obj2)
         {
             return obj1.Index == obj2.Index;

@@ -115,7 +115,7 @@ namespace EvadePlus.SkillshotTypes
         public override Geometry.Polygon ToPolygon(float extrawidth = 0)
         {
             if (SpellData.AddHitbox)
-                extrawidth += Player.Instance.BoundingRadius;
+                extrawidth += Player.Instance.HitBoxRadius();
 
             return new Geometry.Polygon.Rectangle(StartPosition, EndPosition.ExtendVector3(StartPosition, -extrawidth),
                 SpellData.Radius*2 + extrawidth);
