@@ -2370,8 +2370,8 @@ namespace EvadePlus
                     SpellData = new SpellData
                     {
                         DisplayName = "Wild Cards",
-                        ChampionName = "disabled/TwistedFate",
-                        SpellName = "WildCards",
+                        ChampionName = "TwistedFate",
+                        SpellName = "disabled/WildCards",
                         Slot = SpellSlot.Q,
                         Delay = 250,
                         Range = 1450,
@@ -2800,7 +2800,7 @@ namespace EvadePlus
                     {
                         DisplayName = "Razor Shuriken",
                         ChampionName = "Zed",
-                        SpellName = "ZedShuriken",
+                        SpellName = "ZedQ",
                         Slot = SpellSlot.Q,
                         Delay = 300,
                         Range = 925,
@@ -2808,7 +2808,7 @@ namespace EvadePlus
                         MissileSpeed = 1700,
                         DangerValue = 2,
                         IsDangerous = false,
-                        MissileSpellName = "ZedShuriken"
+                        MissileSpellName = "ZedQMissile"
                     }
                 },
                 //new CircularMissileSkillshot

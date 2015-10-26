@@ -518,14 +518,15 @@ namespace EvadePlus
                     }
                 }
 
-                if (LastEvadeResult != null && !IsHeroPathSafe(evade, desiredPath))
+                if (LastEvadeResult != null)
                 {
-                    if (!hero.IsMovingTowards(LastEvadeResult.WalkPoint))
+                    if (!hero.IsMovingTowards(LastEvadeResult.WalkPoint) && !IsHeroPathSafe(evade, desiredPath))
                     {
                         AutoPathing.StopPath();
                         MoveTo(LastEvadeResult.WalkPoint, false);
-                        return true;
                     }
+
+                    return true;
                 }
             }
             else if (!IsPathSafe(hero.RealPath()) || (desiredPath != null && !IsPathSafe(desiredPath)))
@@ -540,7 +541,7 @@ namespace EvadePlus
                 }
 
                 LastEvadeResult = null;
-                return true;
+                return desiredPath != null;
             }
             else
             {

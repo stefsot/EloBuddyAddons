@@ -150,6 +150,8 @@ namespace EvadePlus
 
         private void OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
+            //Chat.Print(args.SData.Name);
+
             if (!EnableSpellDetection)
             {
                 return;
