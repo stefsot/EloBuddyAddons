@@ -531,6 +531,14 @@ namespace EvadePlus
                     }
                 }
 
+                if (LastEvadeResult != null && desiredPath != null)
+                {
+                    if (IsHeroPathSafe(evade, desiredPath))
+                    {
+                        LastEvadeResult = null;
+                    }
+                }
+
                 if (LastEvadeResult != null)
                 {
                     if (!hero.IsMovingTowards(LastEvadeResult.WalkPoint) && !IsHeroPathSafe(evade, desiredPath))
