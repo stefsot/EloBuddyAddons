@@ -533,13 +533,15 @@ namespace EvadePlus
 
                 if (LastEvadeResult != null)
                 {
-                    if (!hero.IsMovingTowards(LastEvadeResult.WalkPoint) && !IsHeroPathSafe(evade, desiredPath))
+                    var isPathSafe = IsHeroPathSafe(evade, desiredPath);
+
+                    if (!hero.IsMovingTowards(LastEvadeResult.WalkPoint) || !isPathSafe)
                     {
                         AutoPathing.StopPath();
                         MoveTo(LastEvadeResult.WalkPoint, false);
-
-                        return true;
                     }
+
+                    return desiredPath == null || !isPathSafe;
                 }
             }
             else if (!IsPathSafe(hero.RealPath()) || (desiredPath != null && !IsPathSafe(desiredPath)))
