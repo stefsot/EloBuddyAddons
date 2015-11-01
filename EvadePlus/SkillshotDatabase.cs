@@ -2795,7 +2795,7 @@ namespace EvadePlus
                         MissileSpellName = "XerathMageSpearMissile"
                     }
                 },
-                new LinearMissileSkillshot
+                new LinearMissileSkillshot()
                 {
                     SpellData = new SpellData
                     {
@@ -2803,7 +2803,7 @@ namespace EvadePlus
                         ChampionName = "Yasuo",
                         SpellName = "yasuoq3w",
                         Slot = SpellSlot.Q,
-                        Delay = 500,
+                        Delay = 400,
                         Range = 1150,
                         Radius = 90,
                         MissileSpeed = 1500,
@@ -2811,7 +2811,7 @@ namespace EvadePlus
                         MissileSpellName = "yasuoq3w"
                     }
                 },
-                new LinearMissileSkillshot
+                new YasuoQ
                 {
                     SpellData = new SpellData
                     {
@@ -2821,14 +2821,14 @@ namespace EvadePlus
                         Slot = SpellSlot.Q,
                         Delay = 400,
                         Range = 550,
-                        Radius = 20,
+                        Radius = 40,
                         MissileSpeed = 0,
                         DangerValue = 2,
                         IsDangerous = true,
                         MissileSpellName = "yasuoq"
                     }
                 },
-                new LinearMissileSkillshot
+                new YasuoQ
                 {
                     SpellData = new SpellData
                     {
@@ -2838,7 +2838,7 @@ namespace EvadePlus
                         Slot = SpellSlot.Q,
                         Delay = 400,
                         Range = 550,
-                        Radius = 20,
+                        Radius = 40,
                         MissileSpeed = 0,
                         DangerValue = 2,
                         IsDangerous = true,

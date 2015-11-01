@@ -72,6 +72,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SkillshotTypes\SpecialTypes\SummonerMark.cs" />
+    <Compile Include="SkillshotTypes\SpecialTypes\YasuoQ.cs" />
     <Compile Include="SpellData.cs" />
     <Compile Include="SkillshotDetector.cs" />
     <Compile Include="Utils.cs" />

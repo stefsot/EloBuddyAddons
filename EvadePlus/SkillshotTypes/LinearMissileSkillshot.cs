@@ -20,8 +20,8 @@ namespace EvadePlus.SkillshotTypes
             TimeDetected = Environment.TickCount;
         }
 
-        private Vector3 _startPos;
-        private Vector3 _endPos;
+        internal Vector3 _startPos;
+        internal Vector3 _endPos;
 
         public MissileClient Missile
         {

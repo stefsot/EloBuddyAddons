@@ -341,8 +341,8 @@ namespace EvadePlus
             var playerPos = Player.Instance.ServerPosition.To2D();
             var polygons = ClippedPolygons.Where(p => p.IsInside(playerPos)).ToArray();
             var maxTime = GetTimeAvailable();
-            var time = Math.Max(0, maxTime - (Game.Ping/2 + ServerTimeBuffer + 30));
-            var moveRadius = (0.9F*time/1000F)*Player.Instance.MoveSpeed;
+            var time = Math.Max(0, maxTime - (Game.Ping + ServerTimeBuffer));
+            var moveRadius = (0.8F*time/1000F)*Player.Instance.MoveSpeed;
             var segments = new List<Vector2[]>();
 
             foreach (var pol in polygons)
@@ -512,14 +512,14 @@ namespace EvadePlus
             {
                 if (LastEvadeResult != null && (!IsPointSafe(LastEvadeResult.EvadePoint) || LastEvadeResult.Expired()))
                 {
-                    LastEvadeResult = null;
+                   // LastEvadeResult = null;
                 }
 
                 var evade = CalculateEvade(LastIssueOrderPos);
                 if (evade.IsValid && evade.EnoughTime)
                 {
                     if (LastEvadeResult == null ||
-                        (LastEvadeResult.EvadePoint.Distance(evade.EvadePoint, true) > 700.Pow() &&
+                        (LastEvadeResult.EvadePoint.Distance(evade.EvadePoint, true) > 500.Pow() &&
                          AllowRecalculateEvade))
                     {
                         LastEvadeResult = evade;
@@ -558,7 +558,6 @@ namespace EvadePlus
 
                 if (path.Length > 0 && AutoPathing.Destination.Distance(path.Last(), true) > 50.Pow())
                 {
-                    Chat.Print("doing new path");
                     AutoPathing.DoPath(path);
                 }
 
