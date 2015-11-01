@@ -2,7 +2,7 @@
 
 namespace EvadePlus
 {
-    internal class Program
+    internal static class Program
     {
         private static SkillshotDetector _skillshotDetector;
         private static EvadePlus _evade;

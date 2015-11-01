@@ -341,7 +341,7 @@ namespace EvadePlus
             var playerPos = Player.Instance.ServerPosition.To2D();
             var polygons = ClippedPolygons.Where(p => p.IsInside(playerPos)).ToArray();
             var maxTime = GetTimeAvailable();
-            var time = Math.Max(0, maxTime - (Game.Ping/2 + ServerTimeBuffer + 20));
+            var time = Math.Max(0, maxTime - (Game.Ping/2 + ServerTimeBuffer + 30));
             var moveRadius = (0.9F*time/1000F)*Player.Instance.MoveSpeed;
             var segments = new List<Vector2[]>();
 
@@ -438,6 +438,8 @@ namespace EvadePlus
 
         public bool IsHeroPathSafe(EvadeResult evade, Vector3[] desiredPath, AIHeroClient hero = null)
         {
+            return false; //temporarily disabled
+
             hero = hero ?? Player.Instance;
 
             var path = (desiredPath ?? hero.RealPath()).ToVector2();
@@ -517,7 +519,7 @@ namespace EvadePlus
                 if (evade.IsValid && evade.EnoughTime)
                 {
                     if (LastEvadeResult == null ||
-                        (LastEvadeResult.EvadePoint.Distance(evade.EvadePoint, true) > 300.Pow() &&
+                        (LastEvadeResult.EvadePoint.Distance(evade.EvadePoint, true) > 700.Pow() &&
                          AllowRecalculateEvade))
                     {
                         LastEvadeResult = evade;
@@ -541,18 +543,23 @@ namespace EvadePlus
                         MoveTo(LastEvadeResult.WalkPoint, false);
                     }
 
-                    return desiredPath == null || !isPathSafe;
+                    return true;  //desiredPath == null || !isPathSafe;
                 }
             }
             else if (!IsPathSafe(hero.RealPath()) || (desiredPath != null && !IsPathSafe(desiredPath)))
             {
                 var path = PathFinding.GetPath(hero.Position.To2D(), LastIssueOrderPos);
+                var evade = CalculateEvade(LastIssueOrderPos);
+
+                if (evade.IsValid)
+                {
+                    path = new[] {evade.EvadePoint}.Concat(path).ToArray();
+                }
+
                 if (path.Length > 0 && AutoPathing.Destination.Distance(path.Last(), true) > 50.Pow())
                 {
-                    if (IsPathSafe(path))
-                    {
-                        AutoPathing.DoPath(path);
-                    }
+                    Chat.Print("doing new path");
+                    AutoPathing.DoPath(path);
                 }
 
                 LastEvadeResult = null;
