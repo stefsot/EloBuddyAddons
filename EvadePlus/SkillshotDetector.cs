@@ -72,7 +72,7 @@ namespace EvadePlus
 
         public void AddSkillshot(EvadeSkillshot skillshot, bool isProcessSpell = false, bool triggerEvent = true)
         {
-            if (LimitDetectionRange &&
+            if (LimitDetectionRange && !skillshot.SpellData.IsGlobal &&
                 skillshot.GetPosition().Distance(Player.Instance, true) > (2*skillshot.SpellData.Range).Pow())
             {
                 return;
