@@ -442,7 +442,7 @@ namespace EvadePlus
 
             hero = hero ?? Player.Instance;
 
-            var path = (desiredPath ?? hero.Path).ToVector2();
+            var path = (desiredPath ?? hero.RealPath()).ToVector2();
             var polygons = ClippedPolygons;
             var points = new List<Vector2>();
 
@@ -546,7 +546,7 @@ namespace EvadePlus
                     return true;  //desiredPath == null || !isPathSafe;
                 }
             }
-            else if (!IsPathSafe(hero.Path) || (desiredPath != null && !IsPathSafe(desiredPath)))
+            else if (!IsPathSafe(hero.RealPath()) || (desiredPath != null && !IsPathSafe(desiredPath)))
             {
                 var path = PathFinding.GetPath(hero.Position.To2D(), LastIssueOrderPos);
                 var evade = CalculateEvade(LastIssueOrderPos);
