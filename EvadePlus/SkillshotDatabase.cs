@@ -3024,7 +3024,41 @@ namespace EvadePlus
                         IsDangerous = true,
                         MissileSpellName = "ZyraBrambleZone"
                     }
-                }
+                },
+                new LinearMissileSkillshot
++                {
++                    SpellData = new SpellData
++                    {
++                        DisplayName = "Tentacle Smash",
++                        ChampionName = "Illaoi",
++                        SpellName = "IllaoiQ",
++                        Slot = SpellSlot.Q,
++                        Delay = 750,
++                        Range = 850,
++                        Radius = 100,
++                        MissileSpeed = 0,
++                        DangerValue = 3,
++                        IsDangerous = true,
++                        MissileSpellName = "illaoiemis"
++                    }
++                },
+				new LinearMissileSkillshot
+                {
+                    SpellData = new SpellData
+                    {
+                        DisplayName = "Test of Spirit",
+                        ChampionName = "Illaoi",
+                        SpellName = "IllaoiE",
+                        Slot = SpellSlot.E,
+                        Delay = 250,
+                        Range = 950,
+                        Radius = 50,
+                        MissileSpeed = 1900,
+                        DangerValue = 3,
+                        IsDangerous = true,
+                        MissileSpellName = "illaoiemis"
+                    }
+                },
             };
         }
     }
