@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using EloBuddy;
 using EvadePlus.SkillshotTypes;
 using EvadePlus.SkillshotTypes.SpecialTypes;
@@ -3026,22 +3026,22 @@ namespace EvadePlus
                     }
                 },
                 new LinearMissileSkillshot
-+                {
-+                    SpellData = new SpellData
-+                    {
-+                        DisplayName = "Tentacle Smash",
-+                        ChampionName = "Illaoi",
-+                        SpellName = "IllaoiQ",
-+                        Slot = SpellSlot.Q,
-+                        Delay = 750,
-+                        Range = 850,
-+                        Radius = 100,
-+                        MissileSpeed = 0,
-+                        DangerValue = 3,
-+                        IsDangerous = true,
-+                        MissileSpellName = "illaoiemis"
-+                    }
-+                },
+                 {
+                     SpellData = new SpellData
+                     {
+                         DisplayName = "Tentacle Smash",
+                         ChampionName = "Illaoi",
+                         SpellName = "IllaoiQ",
+                         Slot = SpellSlot.Q,
+                         Delay = 750,
+                         Range = 850,
+                         Radius = 100,
+                         MissileSpeed = 0,
+                         DangerValue = 3,
+                         IsDangerous = true,
+                         MissileSpellName = "illaoiemis"
+                     }
+                 },
 				new LinearMissileSkillshot
                 {
                     SpellData = new SpellData
