@@ -3059,6 +3059,40 @@ namespace EvadePlus
                         MissileSpellName = "illaoiemis"
                     }
                 },
+                new LinearMissileSkillshot
+                {
+                    SpellData = new SpellData
+                    {
+                        DisplayName = "End of the Line",
+                        ChampionName = "Graves",
+                        SpellName = "GravesQLineSpell",
+                        Slot = SpellSlot.Q,
+                        Delay = 250,
+                        Range = 808,
+                        Radius = 40,
+                        MissileSpeed = 3000,
+                        DangerValue = 2,
+                        IsDangerous = false,
+                        MissileSpellName = "GravesQLineMis"
+                    }
+                },
+		new LinearMissileSkillshot
+                {
+                    SpellData = new SpellData
+                    {
+                        DisplayName = "Hammer Shock",
+                        ChampionName = "Poppy",
+                        SpellName = "PoppyQ",
+                        Slot = SpellSlot.Q,
+                        Delay = 500,
+                        Range = 430,
+                        Radius = 100,
+                        MissileSpeed = 0,
+                        DangerValue = 2,
+                        IsDangerous = false,
+                        MissileSpellName = "PoppyQ"
+                    }
+                },
             };
         }
     }
