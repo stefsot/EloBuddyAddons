@@ -40,7 +40,7 @@ namespace EvadePlus
 
         public static bool IsWalking(this Obj_AI_Base unit)
         {
-            return unit.Path.Length > 2;
+            return unit.IsMoving;
         }
 
         public static Vector3 Destination(this Obj_AI_Base unit)
@@ -150,8 +150,11 @@ namespace EvadePlus
             {
                 var lineStart = polygon.Points[i];
                 var lineEnd = (i + 1 == polygon.Points.Count) ? polygon.Points[0] : polygon.Points[i + 1];
-                Drawing.DrawLine(lineStart.To3DPlayer().WorldToScreen(), lineEnd.To3DPlayer().WorldToScreen(), lineWidth,
-                    color);
+
+                if (!Program.SdkDrawings)
+                    Drawing.DrawLine(lineStart.To3DPlayer().WorldToScreen(), lineEnd.To3DPlayer().WorldToScreen(), lineWidth, color);
+                else
+                    Line.DrawLine(color, lineWidth + 1, lineStart.To3DPlayer(), lineEnd.To3DPlayer());
             }
         }
 
@@ -254,7 +257,7 @@ namespace EvadePlus
             return missile == null ? obj.Team : missile.SpellCaster.Team;
         }
 
-        public static void Draw3DRect(Vector3 start, Vector3 end, float width, Color color, int lineWidth = 2,
+        public static void Draw3DRect(Vector3 start, Vector3 end, float width, Color color, int lineWidth = 3,
             bool drawStartLine = true)
         {
             var halfWidth = width/2;
@@ -262,37 +265,34 @@ namespace EvadePlus
             var d2 = end.To2D();
             var direction = (d1 - d2).Perpendicular().Normalized();
 
-            Drawing.DrawLine(Drawing.WorldToScreen((d1 + direction*halfWidth).To3DPlayer()),
-                Drawing.WorldToScreen((d2 + direction*halfWidth).To3DPlayer()), lineWidth, color);
-            Drawing.DrawLine(Drawing.WorldToScreen((d1 + direction*-halfWidth).To3DPlayer()),
-                Drawing.WorldToScreen((d2 + direction*-halfWidth).To3DPlayer()), lineWidth, color);
-            Drawing.DrawLine(Drawing.WorldToScreen((d1 + direction*halfWidth).To3DPlayer()),
-                Drawing.WorldToScreen((d1 + direction*-halfWidth).To3DPlayer()), lineWidth, color);
-            Drawing.DrawLine(Drawing.WorldToScreen((d2 + direction*halfWidth).To3DPlayer()),
-                Drawing.WorldToScreen((d2 + direction*-halfWidth).To3DPlayer()), lineWidth, color);
+            if (!Program.SdkDrawings)
+            {
 
-            if (drawStartLine)
-                Drawing.DrawLine(
-                    Drawing.WorldToScreen((d1 + direction*(halfWidth + Player.Instance.BoundingRadius)).To3DPlayer()),
-                    Drawing.WorldToScreen((d1 + direction*-(halfWidth + Player.Instance.BoundingRadius)).To3DPlayer()),
-                    lineWidth,
-                    Color.LawnGreen);
+                Drawing.DrawLine((d1 + direction * halfWidth).To3DPlayer().WorldToScreen(), (d2 + direction * halfWidth).To3DPlayer().WorldToScreen(), lineWidth, color);
+                Drawing.DrawLine((d1 + direction * -halfWidth).To3DPlayer().WorldToScreen(), (d2 + direction * -halfWidth).To3DPlayer().WorldToScreen(), lineWidth, color);
+                Drawing.DrawLine((d1 + direction * halfWidth).To3DPlayer().WorldToScreen(), (d1 + direction * -halfWidth).To3DPlayer().WorldToScreen(), lineWidth, color);
+                Drawing.DrawLine((d2 + direction * halfWidth).To3DPlayer().WorldToScreen(), (d2 + direction * -halfWidth).To3DPlayer().WorldToScreen(), lineWidth, color);
 
-            //Line.DrawLine(color, lineWidth, (d1 + direction*halfWidth).To3DPlayer(),
-            //    (d2 + direction*halfWidth).To3DPlayer());
-            //Line.DrawLine(color, lineWidth, (d1 + direction*-halfWidth).To3DPlayer(),
-            //    (d2 + direction*-halfWidth).To3DPlayer());
-            //Line.DrawLine(color, lineWidth, (d1 + direction*halfWidth).To3DPlayer(),
-            //    (d1 + direction*-halfWidth).To3DPlayer());
-            //Line.DrawLine(color, lineWidth, (d2 + direction*halfWidth).To3DPlayer(),
-            //    (d2 + direction*-halfWidth).To3DPlayer());
+                if (drawStartLine)
+                    Drawing.DrawLine(
+                        (d1 + direction * (halfWidth + Player.Instance.BoundingRadius)).To3DPlayer().WorldToScreen(),
+                        (d1 + direction * -(halfWidth + Player.Instance.BoundingRadius)).To3DPlayer().WorldToScreen(),
+                        lineWidth, Color.LawnGreen);
+            }
+            else
+            {
+                Line.DrawLine(color, lineWidth, (d1 + direction * halfWidth).To3DPlayer(),(d2 + direction * halfWidth).To3DPlayer());
+                Line.DrawLine(color, lineWidth, (d1 + direction * -halfWidth).To3DPlayer(),(d2 + direction * -halfWidth).To3DPlayer());
+                Line.DrawLine(color, lineWidth, (d1 + direction * halfWidth).To3DPlayer(),(d1 + direction * -halfWidth).To3DPlayer());
+                Line.DrawLine(color, lineWidth, (d2 + direction * halfWidth).To3DPlayer(),(d2 + direction * -halfWidth).To3DPlayer());
 
-            //if (drawStartLine)
-            //{
-            //    Line.DrawLine(Color.LawnGreen, lineWidth,
-            //        (d1 + direction*(halfWidth + Player.Instance.BoundingRadius)).To3DPlayer(),
-            //        (d1 + direction*-(halfWidth + Player.Instance.BoundingRadius)).To3DPlayer());
-            //}
+                if (drawStartLine)
+                {
+                    Line.DrawLine(Color.LawnGreen, lineWidth,
+                        (d1 + direction * (halfWidth + Player.Instance.BoundingRadius)).To3DPlayer(),
+                        (d1 + direction * -(halfWidth + Player.Instance.BoundingRadius)).To3DPlayer());
+                }
+            }
         }
 
         public static void DrawPath(Vector2[] path, Color color, int lineWidth = 1)
@@ -301,8 +301,11 @@ namespace EvadePlus
             {
                 var lineStart = path[i];
                 var lineEnd = path[i + 1];
-                Drawing.DrawLine(lineStart.To3DWorld().WorldToScreen(), lineEnd.To3DWorld().WorldToScreen(), lineWidth,
-                    color);
+
+                if (!Program.SdkDrawings)
+                    Drawing.DrawLine(lineStart.To3DWorld().WorldToScreen(), lineEnd.To3DWorld().WorldToScreen(), lineWidth, color);
+                else
+                    Line.DrawLine(color, lineWidth, lineStart.To3DPlayer(), lineEnd.To3DPlayer());
             }
         }
 

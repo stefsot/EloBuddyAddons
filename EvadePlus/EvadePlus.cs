@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using EloBuddy;
 using EloBuddy.SDK;
+using EloBuddy.SDK.Events;
 using EloBuddy.SDK.Menu.Values;
 using EloBuddy.SDK.Rendering;
 using SharpDX;
@@ -86,7 +87,6 @@ namespace EvadePlus
 
         private EvadeResult LastEvadeResult;
         private Text StatusText;
-        private Text StatusTextShadow;
         private int EvadeIssurOrderTime;
 
         public EvadePlus(SkillshotDetector detector)
@@ -95,8 +95,7 @@ namespace EvadePlus
             Polygons = new Geometry.Polygon[] {};
             ClippedPolygons = new List<Geometry.Polygon>();
             PathFinding = new PathFinding(this);
-            StatusText = new Text("EvadePlus Enabled", new Font("Calisto MT", 10F, FontStyle.Bold));
-            StatusTextShadow = new Text("EvadePlus Enabled", new Font("Calisto MT", 10F, FontStyle.Bold));
+            StatusText = new Text("EvadePlus Enabled", new Font("Euphemia", 10F, FontStyle.Bold)); //Calisto MT
 
             SkillshotDetector = detector;
             SkillshotDetector.OnUpdateSkillshots += OnUpdateSkillshots;
@@ -105,6 +104,8 @@ namespace EvadePlus
             SkillshotDetector.OnSkillshotDeleted += OnSkillshotDeleted;
 
             Player.OnIssueOrder += PlayerOnIssueOrder;
+            Obj_AI_Base.OnProcessSpellCast += OnProcessSpellCast;
+            Dash.OnDash += OnDash;
             Game.OnTick += Ontick;
             Drawing.OnDraw += OnDraw;
         }
@@ -134,7 +135,7 @@ namespace EvadePlus
         {
             if (RestorePosition && !SkillshotDetector.DetectedSkillshots.Any())
             {
-                if (AutoPathing.IsPathing && Player.Instance.Path.Length > 2)
+                if (AutoPathing.IsPathing && Player.Instance.IsWalking())
                 {
                     var destination = AutoPathing.Destination;
                     AutoPathing.StopPath();
@@ -213,6 +214,30 @@ namespace EvadePlus
             }
         }
 
+        private void OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
+        {
+            if (!sender.IsMe)
+            {
+                return;
+            }
+
+            if (args.SData.Name == "summonerflash")
+            {
+                LastEvadeResult = null;
+            }
+        }
+
+        private void OnDash(Obj_AI_Base sender, Dash.DashEventArgs dashEventArgs)
+        {
+            if (!sender.IsMe)
+            {
+                return;
+            }
+
+            LastEvadeResult = null;
+            Player.IssueOrder(GameObjectOrder.MoveTo, LastIssueOrderPos.To3DWorld(), false);
+        }
+
         private void OnDraw(EventArgs args)
         {
             if (DisableDrawings)
@@ -233,14 +258,7 @@ namespace EvadePlus
             {
                 StatusText.Color = EvadeEnabled ? Color.White : Color.Red;
                 StatusText.TextValue = "EvadePlus " + (EvadeEnabled ? "Enabled" : "Disabled");
-                StatusText.Position = Player.Instance.Position.WorldToScreen() -
-                                      new Vector2(StatusText.Bounding.Width/2, -20);
-
-                StatusTextShadow.Color = Color.Black;
-                StatusTextShadow.TextValue = StatusText.TextValue;
-                StatusTextShadow.Position = StatusText.Position - new Vector2(1, 1);
-
-                StatusTextShadow.Draw();
+                StatusText.Position = Player.Instance.Position.WorldToScreen() - new Vector2(StatusText.Bounding.Width/2, -25);
                 StatusText.Draw();
             }
 
@@ -254,6 +272,9 @@ namespace EvadePlus
                     pol.DrawPolygon(Color.Red, 2);
                 }
             }
+
+            //Utils.DrawPath(PathFinding.GetPath(Player.Instance.Position.To2D(), Game.CursorPos.To2D()), Color.Blue);
+            //Utils.DrawPath(Player.Instance.GetPath(Game.CursorPos, true).ToVector2(), Color.Blue);
         }
 
         private void CacheSkillshots()
@@ -491,7 +512,7 @@ namespace EvadePlus
 
         public bool DoEvade(Vector3[] desiredPath = null, PlayerIssueOrderEventArgs args = null)
         {
-            if (!EvadeEnabled || Player.Instance.IsDead)
+            if (!EvadeEnabled || Player.Instance.IsDead || Player.Instance.IsDashing())
             {
                 LastEvadeResult = null;
                 AutoPathing.StopPath();

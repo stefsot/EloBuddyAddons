@@ -109,7 +109,7 @@ namespace EvadePlus.SkillshotTypes
                 return;
             }
 
-            Utils.Draw3DRect(StartPosition, EndPosition, SpellData.Radius*2, Color.White);
+            Utils.Draw3DRect(StartPosition, EndPosition, SpellData.Radius * 2, Color.White);
         }
 
         public override Geometry.Polygon ToPolygon(float extrawidth = 0)

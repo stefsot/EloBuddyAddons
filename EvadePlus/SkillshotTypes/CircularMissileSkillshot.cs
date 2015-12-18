@@ -60,6 +60,7 @@ namespace EvadePlus.SkillshotTypes
             PrimaryCircle = new Circle
             {
                 Radius = SpellData.Radius,
+                BorderWidth = 3,
                 Color = Color.White
             };
 

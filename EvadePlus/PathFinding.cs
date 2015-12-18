@@ -15,42 +15,42 @@ namespace EvadePlus
             Evade = evade;
         }
 
-        public Vector2[] CreatePath(Vector2 start, Vector2 end)
+        public Vector2[] CreatePathOld(Vector2 start, Vector2 end)
         {
             const int extraWidth = 30;
             var walkPolygons = Geometry.ClipPolygons(Evade.Skillshots.Select(c => c.ToPolygon(extraWidth))).ToPolygons();
 
-            if (walkPolygons.Any(pol => pol.IsInside(start)))
-            {
-                var polPoints =
-                    Geometry.ClipPolygons(
-                        Evade.SkillshotDetector.DetectedSkillshots.Where(c => c.IsValid)
-                            .Select(c => c.ToPolygon(extraWidth))
-                            .ToList())
-                        .ToPolygons()
-                        .Where(pol => pol.IsInside(start))
-                        .SelectMany(pol => pol.Points)
-                        .ToList();
-                polPoints.Sort((p1, p2) => p1.Distance(start, true).CompareTo(p2.Distance(start, true)));
-                start = polPoints.First().Extend(start, -150);
-            }
+            //if (walkPolygons.Any(pol => pol.IsInside(start)))
+            //{
+            //    var polPoints =
+            //        Geometry.ClipPolygons(
+            //            Evade.SkillshotDetector.DetectedSkillshots.Where(c => c.IsValid)
+            //                .Select(c => c.ToPolygon(extraWidth))
+            //                .ToList())
+            //            .ToPolygons()
+            //            .Where(pol => pol.IsInside(start))
+            //            .SelectMany(pol => pol.Points)
+            //            .ToList();
+            //    polPoints.Sort((p1, p2) => p1.Distance(start, true).CompareTo(p2.Distance(start, true)));
+            //    start = polPoints.First().Extend(start, -150);
+            //}
 
-            if (walkPolygons.Any(pol => pol.IsInside(end)))
-            {
-                var polPoints =
-                    Geometry.ClipPolygons(
-                        Evade.SkillshotDetector.DetectedSkillshots.Where(c => c.IsValid)
-                            .Select(c => c.ToPolygon(extraWidth))
-                            .ToList())
-                        .ToPolygons()
-                        .Where(pol => pol.IsInside(end))
-                        .SelectMany(pol => pol.Points)
-                        .ToList();
-                polPoints.Sort((p1, p2) => p1.Distance(end, true).CompareTo(p2.Distance(end, true)));
-                end = polPoints.First().Extend(end, -extraWidth);
-            }
+            //if (walkPolygons.Any(pol => pol.IsInside(end)))
+            //{
+            //    var polPoints =
+            //        Geometry.ClipPolygons(
+            //            Evade.SkillshotDetector.DetectedSkillshots.Where(c => c.IsValid)
+            //                .Select(c => c.ToPolygon(extraWidth))
+            //                .ToList())
+            //            .ToPolygons()
+            //            .Where(pol => pol.IsInside(end))
+            //            .SelectMany(pol => pol.Points)
+            //            .ToList();
+            //    polPoints.Sort((p1, p2) => p1.Distance(end, true).CompareTo(p2.Distance(end, true)));
+            //    end = polPoints.First().Extend(end, -extraWidth);
+            //}
 
-            var ritoPath = Player.Instance.GetPath(start.To3DWorld(), end.To3DWorld(), true).ToArray().ToVector2().ToList();
+            var ritoPath = Player.Instance.GetPath(end.To3DWorld()).ToArray().ToVector2().ToList(); //start.To3DWorld(), 
             var pathPoints = new List<Vector2>();
             var polygonDictionary = new Dictionary<Vector2, Geometry.Polygon>();
 
@@ -175,6 +175,34 @@ namespace EvadePlus
             return path.ToArray();
         }
 
+        public Vector2[] CreatePath(Vector2 start, Vector2 end)
+        {
+            var path = Player.Instance.GetPath(end.To3DWorld(), true);
+            var polygons = Evade.ClippedPolygons.OrderByDescending(p => p.CenterOfPolygon().Distance(Player.Instance, true)).Reverse().ToArray();
+
+            for (var i = 0; i < path.Length - 1; i++)
+            {
+                var lineStart = path[i];
+                var lineEnd = path[i + 1];
+
+                foreach (var pol in polygons)
+                {
+                    var points = pol.GetIntersectionPointsWithLineSegment(lineStart.To2D(), lineEnd.To2D());
+
+                    if (points.Length > 0)
+                    {
+                        var endPoint =
+                            points.OrderByDescending(p => p.Distance(Player.Instance, true))
+                                .Last()
+                                .Extend(Player.Instance.ServerPosition, Player.Instance.HitBoxRadius());
+                        return new[] { Player.Instance.ServerPosition.To2D(), endPoint };
+                    }
+                }
+            }
+
+            return path.ToVector2();
+        }
+
         public Vector2[] CleanPath(Vector2[] path)
         {
             if (path == null || path.Length == 0)
@@ -202,7 +230,7 @@ namespace EvadePlus
 
         public Vector2[] GetPath(Vector2 start, Vector2 end)
         {
-            return CleanPath(CreatePath(start, end));
+            return /*CleanPath*/(CreatePath(start, end));
         }
     }
 }

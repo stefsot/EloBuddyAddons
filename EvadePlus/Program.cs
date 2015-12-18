@@ -4,6 +4,9 @@ namespace EvadePlus
 {
     internal static class Program
     {
+        public static bool DeveloperMode = false;
+        public static bool SdkDrawings = false;
+
         private static SkillshotDetector _skillshotDetector;
         private static EvadePlus _evade;
 
@@ -11,7 +14,7 @@ namespace EvadePlus
         {
             Loading.OnLoadingComplete += delegate
             {
-                _skillshotDetector = new SkillshotDetector();
+                _skillshotDetector = new SkillshotDetector(DeveloperMode ? DetectionTeam.AnyTeam : DetectionTeam.EnemyTeam);
                 _evade = new EvadePlus(_skillshotDetector);
                 EvadeMenu.CreateMenu();
             };
