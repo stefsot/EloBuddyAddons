@@ -360,7 +360,7 @@ namespace EvadePlus
                         ChampionName = "Braum",
                         SpellName = "BraumQ",
                         Slot = SpellSlot.Q,
-                        Delay = 30000,
+                        Delay = 250,
                         Range = 1000,
                         Radius = 100,
                         MissileSpeed = 1200,
