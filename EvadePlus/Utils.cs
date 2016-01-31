@@ -30,7 +30,7 @@ namespace EvadePlus
 
         public static float HitBoxRadius(this Obj_AI_Base unit)
         {
-            return unit.BoundingRadius/2;
+            return unit.BoundingRadius;
         }
 
         public static bool IndexEquals(this GameObject obj1, GameObject obj2)
@@ -50,12 +50,17 @@ namespace EvadePlus
 
         public static int WalkingTime(this Obj_AI_Base unit, Vector2 point)
         {
-            return (int) (1000*unit.ServerPosition.Distance(point)/unit.MoveSpeed);
+            return (int) (1000 * unit.ServerPosition.Distance(point) / unit.MoveSpeed);
+        }
+
+        public static int WalkingTime(this Obj_AI_Base unit, Vector2 start, Vector2 end)
+        {
+            return (int) (1000 * start.Distance(end) / unit.MoveSpeed);
         }
 
         public static bool IsMovingTowards(this Obj_AI_Base unit, Vector3 position)
         {
-            return unit.Path.Length > 2 && unit.Path.Last().Distance(position, true) <= 50.Pow();
+            return unit.IsWalking() && unit.Path.Last().Distance(position, true) <= 50.Pow();
         }
 
         public static bool IsMovingTowards(this Obj_AI_Base unit, Vector2 position)
@@ -75,7 +80,7 @@ namespace EvadePlus
 
         public static Vector3 ExtendVector3(this Vector3 vector, Vector3 direction, float distance)
         {
-            if (vector.To2D().Distance(direction.To2D()) == 0)
+            if (vector.To2D().Distance(direction.To2D(), true) == 0)
             {
                 return vector;
             }
@@ -83,16 +88,16 @@ namespace EvadePlus
             var edge = direction.To2D() - vector.To2D();
             edge.Normalize();
 
-            var v = vector.To2D() + edge*distance;
+            var v = vector.To2D() + edge * distance;
             return new Vector3(v.X, v.Y, vector.Z);
         }
 
-        public static Vector2[] ToVector2(this Vector3[] source)
+        public static Vector2[] ToVector2(this IEnumerable<Vector3> source)
         {
             return source.Select(v => v.To2D()).ToArray();
         }
 
-        public static Vector3[] ToVector3(this Vector2[] source)
+        public static Vector3[] ToVector3(this IEnumerable<Vector2> source)
         {
             return source.Select(v => v.To3DWorld()).ToArray();
         }
@@ -100,26 +105,27 @@ namespace EvadePlus
         public static float Distance(this Vector2 point, Vector2 segmentStart, Vector2 segmentEnd, bool squared = false)
         {
             var a =
-                Math.Abs((segmentEnd.Y - segmentStart.Y)*point.X - (segmentEnd.X - segmentStart.X)*point.Y +
-                         segmentEnd.X*segmentStart.Y - segmentEnd.Y*segmentStart.X);
-            return (squared ? a*a : a)/segmentStart.Distance(segmentEnd, squared);
+                Math.Abs((segmentEnd.Y - segmentStart.Y) * point.X - (segmentEnd.X - segmentStart.X) * point.Y +
+                         segmentEnd.X * segmentStart.Y - segmentEnd.Y * segmentStart.X);
+            return (squared ? a * a : a) / segmentStart.Distance(segmentEnd, squared);
         }
 
-        public static bool IsInLineSegment(this Vector2 point, Vector2 segmentStart, Vector2 segmentEnd, float tolerance = 0)
+        public static bool IsInLineSegment(this Vector2 point, Vector2 segmentStart, Vector2 segmentEnd,
+            float tolerance = 0)
         {
             var d = segmentStart.Distance(segmentEnd, true);
             return point.Distance(segmentEnd, true) <= d + tolerance &&
                    point.Distance(segmentStart, true) <= d + tolerance;
         }
 
-        public static Geometry.Polygon ToPolygon(this List<Vector2> points)
+        public static Geometry.Polygon ToPolygon(this IEnumerable<Vector2> points)
         {
             var polygon = new Geometry.Polygon();
             polygon.Points.AddRange(points);
             return polygon;
         }
 
-        public static Geometry.Polygon ToDetailedPolygon(this Geometry.Polygon polygon, float tolerance = 90)
+        public static Geometry.Polygon ToDetailedPolygon(this Geometry.Polygon polygon, float tolerance = 80)
         {
             var list = new List<Vector2>();
 
@@ -130,10 +136,11 @@ namespace EvadePlus
 
                 if (lineStart.Distance(lineEnd, true) > tolerance.Pow())
                 {
-                    var condition = (int) lineStart.Distance(lineEnd)/tolerance;
+                    var condition = (int) lineStart.Distance(lineEnd) / tolerance;
+                   
                     for (var u = 0; u < condition; u++)
                     {
-                        list.Add(lineStart.Extend(lineEnd, u*tolerance));
+                        list.Add(lineStart.Extend(lineEnd, u * tolerance));
                     }
                 }
                 else
@@ -152,14 +159,17 @@ namespace EvadePlus
                 var lineEnd = (i + 1 == polygon.Points.Count) ? polygon.Points[0] : polygon.Points[i + 1];
 
                 if (!Program.SdkDrawings)
+                {
                     Drawing.DrawLine(lineStart.To3DPlayer().WorldToScreen(), lineEnd.To3DPlayer().WorldToScreen(), lineWidth, color);
+                }
                 else
+                {
                     Line.DrawLine(color, lineWidth + 1, lineStart.To3DPlayer(), lineEnd.To3DPlayer());
+                }
             }
         }
 
-        public static bool IsIntersectingWithLineSegment(this Geometry.Polygon polygon, Vector2 segmentStart,
-            Vector2 segmentEnd)
+        public static bool IsIntersectingWithLineSegment(this Geometry.Polygon polygon, Vector2 segmentStart, Vector2 segmentEnd)
         {
             for (var i = 0; i < polygon.Points.Count; i++)
             {
@@ -178,8 +188,7 @@ namespace EvadePlus
             return false;
         }
 
-        public static Vector2[] GetIntersectionPointsWithLineSegment(this Geometry.Polygon polygon, Vector2 segmentStart,
-            Vector2 segmentEnd)
+        public static Vector2[] GetIntersectionPointsWithLineSegment(this Geometry.Polygon polygon, Vector2 segmentStart, Vector2 segmentEnd)
         {
             var points = new List<Vector2>();
 
@@ -189,8 +198,7 @@ namespace EvadePlus
                 var lineEnd = (i + 1 == polygon.Points.Count) ? polygon.Points[0] : polygon.Points[i + 1];
 
                 bool intersection;
-                var point = GetLineSegmentsIntersectionPoint(lineStart, lineEnd, segmentStart, segmentEnd,
-                    out intersection);
+                var point = GetLineSegmentsIntersectionPoint(lineStart, lineEnd, segmentStart, segmentEnd, out intersection);
 
                 if (intersection)
                 {
@@ -201,7 +209,7 @@ namespace EvadePlus
             return points.ToArray();
         }
 
-        public static List<Vector2> GetSortedPath(this List<Vector2> path, Vector2 start)
+        public static IEnumerable<Vector2> GetSortedPath(this List<Vector2> path, Vector2 start)
         {
             var list = new List<Vector2>();
             var current = start;
@@ -257,21 +265,23 @@ namespace EvadePlus
             return missile == null ? obj.Team : missile.SpellCaster.Team;
         }
 
-        public static void Draw3DRect(Vector3 start, Vector3 end, float width, Color color, int lineWidth = 3,
-            bool drawStartLine = true)
+        public static void Draw3DRect(Vector3 start, Vector3 end, float width, Color color, int lineWidth = 3, bool drawStartLine = true)
         {
-            var halfWidth = width/2;
+            var halfWidth = width / 2;
             var d1 = start.To2D();
             var d2 = end.To2D();
             var direction = (d1 - d2).Perpendicular().Normalized();
 
             if (!Program.SdkDrawings)
             {
-
-                Drawing.DrawLine((d1 + direction * halfWidth).To3DPlayer().WorldToScreen(), (d2 + direction * halfWidth).To3DPlayer().WorldToScreen(), lineWidth, color);
-                Drawing.DrawLine((d1 + direction * -halfWidth).To3DPlayer().WorldToScreen(), (d2 + direction * -halfWidth).To3DPlayer().WorldToScreen(), lineWidth, color);
-                Drawing.DrawLine((d1 + direction * halfWidth).To3DPlayer().WorldToScreen(), (d1 + direction * -halfWidth).To3DPlayer().WorldToScreen(), lineWidth, color);
-                Drawing.DrawLine((d2 + direction * halfWidth).To3DPlayer().WorldToScreen(), (d2 + direction * -halfWidth).To3DPlayer().WorldToScreen(), lineWidth, color);
+                Drawing.DrawLine((d1 + direction * halfWidth).To3DPlayer().WorldToScreen(),
+                    (d2 + direction * halfWidth).To3DPlayer().WorldToScreen(), lineWidth, color);
+                Drawing.DrawLine((d1 + direction * -halfWidth).To3DPlayer().WorldToScreen(),
+                    (d2 + direction * -halfWidth).To3DPlayer().WorldToScreen(), lineWidth, color);
+                Drawing.DrawLine((d1 + direction * halfWidth).To3DPlayer().WorldToScreen(),
+                    (d1 + direction * -halfWidth).To3DPlayer().WorldToScreen(), lineWidth, color);
+                Drawing.DrawLine((d2 + direction * halfWidth).To3DPlayer().WorldToScreen(),
+                    (d2 + direction * -halfWidth).To3DPlayer().WorldToScreen(), lineWidth, color);
 
                 if (drawStartLine)
                     Drawing.DrawLine(
@@ -281,10 +291,14 @@ namespace EvadePlus
             }
             else
             {
-                Line.DrawLine(color, lineWidth, (d1 + direction * halfWidth).To3DPlayer(),(d2 + direction * halfWidth).To3DPlayer());
-                Line.DrawLine(color, lineWidth, (d1 + direction * -halfWidth).To3DPlayer(),(d2 + direction * -halfWidth).To3DPlayer());
-                Line.DrawLine(color, lineWidth, (d1 + direction * halfWidth).To3DPlayer(),(d1 + direction * -halfWidth).To3DPlayer());
-                Line.DrawLine(color, lineWidth, (d2 + direction * halfWidth).To3DPlayer(),(d2 + direction * -halfWidth).To3DPlayer());
+                Line.DrawLine(color, lineWidth, (d1 + direction * halfWidth).To3DPlayer(),
+                    (d2 + direction * halfWidth).To3DPlayer());
+                Line.DrawLine(color, lineWidth, (d1 + direction * -halfWidth).To3DPlayer(),
+                    (d2 + direction * -halfWidth).To3DPlayer());
+                Line.DrawLine(color, lineWidth, (d1 + direction * halfWidth).To3DPlayer(),
+                    (d1 + direction * -halfWidth).To3DPlayer());
+                Line.DrawLine(color, lineWidth, (d2 + direction * halfWidth).To3DPlayer(),
+                    (d2 + direction * -halfWidth).To3DPlayer());
 
                 if (drawStartLine)
                 {
@@ -303,76 +317,77 @@ namespace EvadePlus
                 var lineEnd = path[i + 1];
 
                 if (!Program.SdkDrawings)
-                    Drawing.DrawLine(lineStart.To3DWorld().WorldToScreen(), lineEnd.To3DWorld().WorldToScreen(), lineWidth, color);
+                    Drawing.DrawLine(lineStart.To3DWorld().WorldToScreen(), lineEnd.To3DWorld().WorldToScreen(),
+                        lineWidth, color);
                 else
                     Line.DrawLine(color, lineWidth, lineStart.To3DPlayer(), lineEnd.To3DPlayer());
             }
         }
 
-        public static Vector2[] GetLineCircleIntersectionPoints(Vector2 center, float radius, Vector2 segmentStart,
-            Vector2 segmentEnd)
+        public static Vector2[] GetLineCircleIntersectionPoints(Vector2 center, float radius, Vector2 segmentStart, Vector2 segmentEnd)
         {
             float t;
 
             var dx = segmentEnd.X - segmentStart.X;
             var dy = segmentEnd.Y - segmentStart.Y;
 
-            var a = dx*dx + dy*dy;
-            var b = 2*(dx*(segmentStart.X - center.X) + dy*(segmentStart.Y - center.Y));
-            var c = (segmentStart.X - center.X)*(segmentStart.X - center.X) +
-                    (segmentStart.Y - center.Y)*(segmentStart.Y - center.Y) -
-                    radius*radius;
+            var a = dx * dx + dy * dy;
+            var b = 2 * (dx * (segmentStart.X - center.X) + dy * (segmentStart.Y - center.Y));
+            var c = (segmentStart.X - center.X) * (segmentStart.X - center.X) +
+                    (segmentStart.Y - center.Y) * (segmentStart.Y - center.Y) -
+                    radius * radius;
 
-            var det = b*b - 4*a*c;
+            var det = b * b - 4 * a * c;
             if ((a <= 0.0000001) || (det < 0))
             {
                 return new Vector2[] {};
             }
             if (det == 0)
             {
-                t = -b/(2*a);
+                t = -b / (2 * a);
                 return new[]
-                {new Vector2(segmentStart.X + t*dx, segmentStart.Y + t*dy)};
+                {new Vector2(segmentStart.X + t * dx, segmentStart.Y + t * dy)};
             }
-            t = (float) ((-b + Math.Sqrt(det))/(2*a));
-            var t2 = (float) ((-b - Math.Sqrt(det))/(2*a));
+            t = (float) ((-b + Math.Sqrt(det)) / (2 * a));
+            var t2 = (float) ((-b - Math.Sqrt(det)) / (2 * a));
             return new[]
             {
-                new Vector2(segmentStart.X + t*dx, segmentStart.Y + t*dy),
-                new Vector2(segmentStart.X + t2*dx, segmentStart.Y + t2*dy)
+                new Vector2(segmentStart.X + t * dx, segmentStart.Y + t * dy),
+                new Vector2(segmentStart.X + t2 * dx, segmentStart.Y + t2 * dy)
             };
         }
 
-        public static Vector2[] GetPointsWithDistance(Vector2 segmentStart, Vector2 segmentEnd, Vector2 point,
-            float distance)
+        public static Vector2[] GetPointsWithDistance(Vector2 segmentStart, Vector2 segmentEnd, Vector2 point, float distance)
         {
             var d = distance.Pow();
-            var a = (segmentEnd.Y - segmentStart.Y)/(segmentEnd.X - segmentStart.X);
-            var b = segmentStart.Y - a*segmentStart.X;
+            var a = (segmentEnd.Y - segmentStart.Y) / (segmentEnd.X - segmentStart.X);
+            var b = segmentStart.Y - a * segmentStart.X;
 
             var x =
                 (float)
-                    (-Math.Sqrt(a.Pow()*d - a.Pow()*point.X - 2*a*b*point.X + 2*a*point.X*point.Y - b.Pow() +
-                                2*b*point.Y + d - point.Y.Pow()) - a*b + a*point.Y + point.X)/(a.Pow() + 1);
-            var y = (float) (-a*
-                             Math.Sqrt(a.Pow()*d - a.Pow()*point.X.Pow() - 2*a*b*point.X + 2*a*point.X*point.Y - b.Pow() +
-                                       2*b*point.Y + d - point.Y.Pow()) + a.Pow()*point.Y + a*point.X + b)/(a.Pow() + 1);
+                    (-Math.Sqrt(a.Pow() * d - a.Pow() * point.X - 2 * a * b * point.X + 2 * a * point.X * point.Y -
+                                b.Pow() +
+                                2 * b * point.Y + d - point.Y.Pow()) - a * b + a * point.Y + point.X) / (a.Pow() + 1);
+            var y = (float) (-a *
+                             Math.Sqrt(a.Pow() * d - a.Pow() * point.X.Pow() - 2 * a * b * point.X +
+                                       2 * a * point.X * point.Y - b.Pow() +
+                                       2 * b * point.Y + d - point.Y.Pow()) + a.Pow() * point.Y + a * point.X + b) /
+                    (a.Pow() + 1);
 
             return new[] {new Vector2(x, y), new Vector2(-x, -y)};
             //.Where(p => p.IsInLineSegment(segmentStart, segmentEnd)).ToArray()
         }
 
-        public static Vector2 GetLinesIntersectionPoint(Vector2 start1, Vector2 end1, Vector2 start2, Vector2 end2,
-            out bool intersection)
+        public static Vector2 GetLinesIntersectionPoint(Vector2 start1, Vector2 end1, Vector2 start2, Vector2 end2, out bool intersection)
         {
             var a1 = end1.Y - start1.Y;
             var a2 = end2.Y - start2.Y;
             var b1 = start1.X - end1.X;
             var b2 = start2.X - end2.X;
-            var c1 = start1.X*a1 + b1*start1.Y;
-            var c2 = start2.X*a2 + b2*start2.Y;
+            var c1 = start1.X * a1 + b1 * start1.Y;
+            var c2 = start2.X * a2 + b2 * start2.Y;
 
-            var det = a1*b2 - a2*b1;
+            var det = a1 * b2 - a2 * b1;
             if (det == 0)
             {
                 intersection = false;
@@ -380,7 +395,7 @@ namespace EvadePlus
             }
 
             intersection = true;
-            return new Vector2((b2*c1 - b1*c2)/det, (a1*c2 - a2*c1)/det);
+            return new Vector2((b2 * c1 - b1 * c2) / det, (a1 * c2 - a2 * c1) / det);
         }
 
         public static Vector2 GetLineSegmentsIntersectionPoint(Vector2 segmentStart1, Vector2 segmentEnd1,

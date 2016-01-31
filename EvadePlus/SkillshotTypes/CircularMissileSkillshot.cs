@@ -147,12 +147,14 @@ namespace EvadePlus.SkillshotTypes
             return new Geometry.Polygon.Circle(Position, SpellData.Radius + extrawidth);
         }
 
-        public override int GetAvailableTime(AIHeroClient hero = null)
+        public override int GetAvailableTime(Vector2 pos)
         {
             if (Missile == null)
             {
-                return (int) (SpellData.Delay - (Environment.TickCount - TimeDetected) +
-                              (Caster.Position.To2D().Distance(Position.To2D()))/SpellData.MissileSpeed*1000);
+                return
+                    (int)
+                        (SpellData.Delay - (Environment.TickCount - TimeDetected) +
+                         (Caster.Position.To2D().Distance(Position.To2D())) / SpellData.MissileSpeed * 1000);
             }
 
             if (!MissileDeleted)

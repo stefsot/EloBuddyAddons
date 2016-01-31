@@ -74,7 +74,7 @@ namespace EvadePlus
             return null;
         }
 
-        public virtual int GetAvailableTime(AIHeroClient hero = null)
+        public virtual int GetAvailableTime(Vector2 pos)
         {
             return 0;
         }

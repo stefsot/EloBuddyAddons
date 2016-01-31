@@ -14,19 +14,21 @@ namespace EvadePlus
 {
     public class EvadePlus
     {
+        #region Properties
+
         public int ServerTimeBuffer
         {
-            get { return EvadeMenu.MainMenu["serverTimeBuffer"].Cast<Slider>().CurrentValue; }
+            get { return EvadeMenu.MainMenu["serverTimeBuffer"].Cast<Slider>().CurrentValue + 45; }
         }
 
         public bool EvadeEnabled
         {
-            get { return EvadeMenu.ControlsMenu["enableEvade"].Cast<KeyBind>().CurrentValue; }
+            get { return EvadeMenu.HotkeysMenu["enableEvade"].Cast<KeyBind>().CurrentValue; }
         }
 
         public bool DodgeDangerousOnly
         {
-            get { return EvadeMenu.ControlsMenu["dodgeOnlyDangerous"].Cast<KeyBind>().CurrentValue; }
+            get { return EvadeMenu.HotkeysMenu["dodgeOnlyDangerous"].Cast<KeyBind>().CurrentValue; }
         }
 
         public int ExtraEvadeRange
@@ -71,8 +73,12 @@ namespace EvadePlus
 
         public int IssueOrderTickLimit
         {
-            get { return 90; }
+            get { return 0 /*Game.Ping * 2*/; }
         }
+
+        #endregion
+
+        #region Vars
 
         public SkillshotDetector SkillshotDetector { get; private set; }
         public PathFinding PathFinding { get; private set; }
@@ -82,12 +88,13 @@ namespace EvadePlus
         public List<Geometry.Polygon> ClippedPolygons { get; private set; }
         public Vector2 LastIssueOrderPos;
 
-        private readonly Dictionary<EvadeSkillshot, Geometry.Polygon> _skillshotPolygonCache =
-            new Dictionary<EvadeSkillshot, Geometry.Polygon>();
+        private readonly Dictionary<EvadeSkillshot, Geometry.Polygon> _skillshotPolygonCache;
 
         private EvadeResult LastEvadeResult;
         private Text StatusText;
         private int EvadeIssurOrderTime;
+
+        #endregion
 
         public EvadePlus(SkillshotDetector detector)
         {
@@ -96,6 +103,7 @@ namespace EvadePlus
             ClippedPolygons = new List<Geometry.Polygon>();
             PathFinding = new PathFinding(this);
             StatusText = new Text("EvadePlus Enabled", new Font("Euphemia", 10F, FontStyle.Bold)); //Calisto MT
+            _skillshotPolygonCache = new Dictionary<EvadeSkillshot, Geometry.Polygon>();
 
             SkillshotDetector = detector;
             SkillshotDetector.OnUpdateSkillshots += OnUpdateSkillshots;
@@ -152,7 +160,7 @@ namespace EvadePlus
         {
             if (!Player.Instance.IsWalking() && LastEvadeResult != null)
             {
-                MoveTo(LastEvadeResult.WalkPoint);
+                //MoveTo(LastEvadeResult.WalkPoint);
             }
 
             if (IsHeroInDanger() && LastEvadeResult == null)
@@ -171,7 +179,7 @@ namespace EvadePlus
             if (args.Order == GameObjectOrder.AttackUnit)
             {
                 LastIssueOrderPos =
-                    (Player.Instance.Distance(args.Target, true) >=
+                    (Player.Instance.Distance(args.Target, true) >
                      Player.Instance.GetAutoAttackRange(args.Target as AttackableUnit).Pow()
                         ? args.Target.Position
                         : Player.Instance.Position).To2D();
@@ -229,7 +237,7 @@ namespace EvadePlus
 
         private void OnDash(Obj_AI_Base sender, Dash.DashEventArgs dashEventArgs)
         {
-            if (!sender.IsMe)
+            if (!sender.IsMe || LastEvadeResult == null)
             {
                 return;
             }
@@ -249,8 +257,7 @@ namespace EvadePlus
             {
                 if (LastEvadeResult.IsValid && LastEvadeResult.EnoughTime && !LastEvadeResult.Expired())
                 {
-                    Circle.Draw(new ColorBGRA(255, 0, 0, 255), Player.Instance.BoundingRadius, 25,
-                        LastEvadeResult.WalkPoint);
+                    Circle.Draw(new ColorBGRA(255, 0, 0, 255), Player.Instance.BoundingRadius, 25, LastEvadeResult.WalkPoint);
                 }
             }
 
@@ -258,16 +265,13 @@ namespace EvadePlus
             {
                 StatusText.Color = EvadeEnabled ? Color.White : Color.Red;
                 StatusText.TextValue = "EvadePlus " + (EvadeEnabled ? "Enabled" : "Disabled");
-                StatusText.Position = Player.Instance.Position.WorldToScreen() - new Vector2(StatusText.Bounding.Width/2, -25);
+                StatusText.Position = Player.Instance.Position.WorldToScreen() - new Vector2(StatusText.Bounding.Width / 2, -25);
                 StatusText.Draw();
             }
 
             if (DrawDangerPolygon)
             {
-                foreach (
-                    var pol in
-                        Geometry.ClipPolygons(SkillshotDetector.ActiveSkillshots.Select(c => c.ToPolygon()))
-                            .ToPolygons())
+                foreach (var pol in Geometry.ClipPolygons(SkillshotDetector.ActiveSkillshots.Select(c => c.ToPolygon())).ToPolygons())
                 {
                     pol.DrawPolygon(Color.Red, 2);
                 }
@@ -285,6 +289,7 @@ namespace EvadePlus
                     : SkillshotDetector.ActiveSkillshots).ToArray();
 
             _skillshotPolygonCache.Clear();
+            
             Polygons = Skillshots.Select(c =>
             {
                 var pol = c.ToPolygon();
@@ -292,6 +297,7 @@ namespace EvadePlus
 
                 return pol;
             }).ToArray();
+
             ClippedPolygons = Geometry.ClipPolygons(Polygons).ToPolygons();
         }
 
@@ -302,14 +308,14 @@ namespace EvadePlus
 
         public bool IsPathSafe(Vector2[] path)
         {
+            return IsPathSafeEx(path);
+
             for (var i = 0; i < path.Length - 1; i++)
             {
                 var start = path[i];
                 var end = path[i + 1];
 
-                if (
-                    ClippedPolygons.Any(
-                        p => p.IsInside(end) || p.IsInside(start) || p.IsIntersectingWithLineSegment(start, end)))
+                if (ClippedPolygons.Any(p => p.IsInside(end) || p.IsInside(start) || p.IsIntersectingWithLineSegment(start, end)))
                 {
                     return false;
                 }
@@ -335,10 +341,12 @@ namespace EvadePlus
             var skillshots = Skillshots.Where(c => _skillshotPolygonCache[c].IsInside(hero.Position)).ToArray();
 
             if (!skillshots.Any())
+            {
                 return short.MaxValue;
+            }
 
             var times =
-                skillshots.Select(c => c.GetAvailableTime(hero))
+                skillshots.Select(c => c.GetAvailableTime(hero.ServerPosition.To2D()))
                     .Where(t => t > 0)
                     .OrderByDescending(t => t);
 
@@ -357,13 +365,71 @@ namespace EvadePlus
             return values.Any() ? values.First() : 0;
         }
 
-        public EvadeResult CalculateEvade(Vector2 anchor)
+        public bool IsPathSafeEx(Vector2[] path, AIHeroClient hero = null)
         {
-            var playerPos = Player.Instance.ServerPosition.To2D();
-            var polygons = ClippedPolygons.Where(p => p.IsInside(playerPos)).ToArray();
-            var maxTime = GetTimeAvailable();
-            var time = Math.Max(0, maxTime - (Game.Ping + ServerTimeBuffer));
-            var moveRadius = (0.8F*time/1000F)*Player.Instance.MoveSpeed;
+            hero = hero ?? Player.Instance;
+
+            for (var i = 0; i < path.Length - 1; i++)
+            {
+                var start = path[i];
+                var end = path[i + 1];
+
+                foreach (var pair in _skillshotPolygonCache)
+                {
+                    var skillshot = pair.Key;
+                    var polygon = pair.Value;
+
+                    if (polygon.IsInside(start) && polygon.IsInside(end))
+                    {
+                        //var time1 = skillshot.GetAvailableTime(start);
+                        var time2 = skillshot.GetAvailableTime(end);
+
+                        if (hero.WalkingTime(start, end) >= time2 - Game.Ping)
+                        {
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        var intersections =
+                            polygon.GetIntersectionPointsWithLineSegment(start, end)
+                                .Concat(new[] {start, end})
+                                .ToList()
+                                .GetSortedPath(start).ToArray();
+
+                        for (var i2 = 0; i2 < intersections.Length - 1; i2++)
+                        {
+                            var point1 = intersections[i2];
+                            var point2 = intersections[i2 + 1];
+
+                            if (polygon.IsInside(point2) || polygon.IsInside(point1))
+                            {
+                                //var time1 = polygon.IsInside(point1) ? skillshot.GetAvailableTime(point1) : short.MaxValue;
+                                var time2 = polygon.IsInside(point2) ? skillshot.GetAvailableTime(point2) : short.MaxValue;
+
+                                if (hero.WalkingTime(point1, point2) >= time2 - Game.Ping)
+                                {
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        public bool IsPathSafeEx(Vector2 end, AIHeroClient hero = null)
+        {
+             hero = hero ?? Player.Instance;
+
+            return IsPathSafeEx(hero.GetPath(end.To3DWorld(), true).ToVector2(), hero);
+        }
+
+        public Vector2[] GetEvadePoints(Vector2 from, float moveRadius)
+        {
+            var polygons = ClippedPolygons.Where(p => p.IsInside(from)).ToArray();
             var segments = new List<Vector2[]>();
 
             foreach (var pol in polygons)
@@ -374,14 +440,13 @@ namespace EvadePlus
                     var end = i == pol.Points.Count - 1 ? pol.Points[0] : pol.Points[i + 1];
 
                     var intersections =
-                        Utils.GetLineCircleIntersectionPoints(playerPos, moveRadius, start, end)
+                        Utils.GetLineCircleIntersectionPoints(from, moveRadius, start, end)
                             .Where(p => p.IsInLineSegment(start, end))
                             .ToList();
 
                     if (intersections.Count == 0)
                     {
-                        if (start.Distance(playerPos, true) < moveRadius.Pow() &&
-                            end.Distance(playerPos, true) < moveRadius.Pow())
+                        if (start.Distance(from, true) < moveRadius.Pow() && end.Distance(from, true) < moveRadius.Pow())
                         {
                             intersections = new[] {start, end}.ToList();
                         }
@@ -392,9 +457,7 @@ namespace EvadePlus
                     }
                     else if (intersections.Count == 1)
                     {
-                        intersections.Add(playerPos.Distance(start, true) > playerPos.Distance(end, true)
-                            ? end
-                            : start);
+                        intersections.Add(from.Distance(start, true) > from.Distance(end, true) ? end : start);
                     }
 
                     segments.Add(intersections.ToArray());
@@ -403,13 +466,11 @@ namespace EvadePlus
 
             if (!segments.Any()) //not enough time
             {
-                var point = GetClosestPoint(polygons, playerPos);
-                return new EvadeResult(this, point, anchor, maxTime, time,
-                    point.Distance(playerPos, true) <= (moveRadius + 10).Pow());
+                return new Vector2[] {};
             }
 
-            const int maxdist = 1500;
-            const int division = 35;
+            const int maxdist = 3000;
+            const int division = 10;
             var points = new List<Vector2>();
 
             foreach (var segment in segments)
@@ -417,38 +478,32 @@ namespace EvadePlus
                 var dist = segment[0].Distance(segment[1]);
                 if (dist > maxdist)
                 {
-                    segment[0] = segment[0].Extend(segment[1], dist/2 - maxdist/2);
-                    segment[1] = segment[1].Extend(segment[1], dist/2 - maxdist/2);
+                    segment[0] = segment[0].Extend(segment[1], dist / 2 - maxdist / 2);
+                    segment[1] = segment[1].Extend(segment[1], dist / 2 - maxdist / 2);
                     dist = maxdist;
                 }
 
-                var step = maxdist/division;
-                var count = dist/step;
+                var step = maxdist / division;
+                var count = dist / step;
 
                 for (var i = 0; i < count; i++)
                 {
-                    var point = segment[0].Extend(segment[1], i*step);
-                    if (!point.IsWall() &&
-                        !Polygons.Where(pol => !pol.IsInside(playerPos))
-                            .Any(pol => pol.IsIntersectingWithLineSegment(playerPos, point.Extend(playerPos, -50))) &&
-                        Player.Instance.GetPath(point.To3DWorld(), true).Length <= 3)
+                    var point = segment[0].Extend(segment[1], i * step);
+                   
+                    if (!point.IsWall() && IsPathSafeEx(point) && Player.Instance.GetPath(point.To3DWorld(), true).Length <= 2)
                     {
                         points.Add(point);
                     }
                 }
             }
 
-            if (!points.Any())
-            {
-                return new EvadeResult(this, GetClosestPoint(polygons, playerPos), anchor, maxTime, time, true);
-            }
-
-            var evadePoint = points.OrderByDescending(p => p.Distance(anchor) + p.Distance(playerPos)).Last();
-            return new EvadeResult(this, evadePoint, anchor, maxTime, time, true);
+            return points.ToArray();
         }
 
-        public Vector2 GetClosestPoint(Geometry.Polygon[] polygons, Vector2 from)
+        public Vector2 GetClosestEvadePoint(Vector2 from)
         {
+            var polygons = ClippedPolygons.Where(p => p.IsInside(from)).ToArray();
+
             var polPoints =
                 polygons.Select(pol => pol.ToDetailedPolygon())
                     .SelectMany(pol => pol.Points)
@@ -457,13 +512,36 @@ namespace EvadePlus
             return !polPoints.Any() ? Vector2.Zero : polPoints.Last();
         }
 
+        public EvadeResult CalculateEvade(Vector2 anchor)
+        {
+            var playerPos = Player.Instance.ServerPosition.To2D();
+            var maxTime = GetTimeAvailable();
+            var time = Math.Max(0, maxTime - (Game.Ping + ServerTimeBuffer));
+            var moveRadius = time / 1000F * Player.Instance.MoveSpeed;
+
+            var points = GetEvadePoints(playerPos, moveRadius);
+
+            if (!points.Any())
+            {
+                return new EvadeResult(this, GetClosestEvadePoint(playerPos), anchor, maxTime, time, true);
+            }
+
+            var evadePoint = points.OrderByDescending(p => p.Distance(playerPos)).Last();
+            
+            //points.OrderByDescending(p => p.Distance(playerPos)).Last();
+                //points.OrderByDescending(p => p.Distance(anchor) + p.Distance(playerPos)).Last();
+                //points.OrderBy(p => p.Distance(playerPos)).ThenBy(p => 1 / p.Distance(anchor)).Last();
+
+            return new EvadeResult(this, evadePoint, anchor, maxTime, time, true);
+        }
+
         public bool IsHeroPathSafe(EvadeResult evade, Vector3[] desiredPath, AIHeroClient hero = null)
         {
-            return false; //temporarily disabled
-
             hero = hero ?? Player.Instance;
 
             var path = (desiredPath ?? hero.RealPath()).ToVector2();
+            return IsPathSafeEx(path, hero);
+
             var polygons = ClippedPolygons;
             var points = new List<Vector2>();
 
@@ -495,13 +573,14 @@ namespace EvadePlus
 
         public bool MoveTo(Vector2 point, bool limit = true)
         {
-            if (limit && EvadeIssurOrderTime + IssueOrderTickLimit > Environment.TickCount)
+            if (limit && EvadeIssurOrderTime + IssueOrderTickLimit >= Environment.TickCount)
             {
                 return false;
             }
 
             EvadeIssurOrderTime = Environment.TickCount;
             Player.IssueOrder(GameObjectOrder.MoveTo, point.To3DWorld(), false);
+
             return true;
         }
 
@@ -523,7 +602,7 @@ namespace EvadePlus
 
             if (args != null && args.Order == GameObjectOrder.AttackUnit)
             {
-                if (!hero.IsInAutoAttackRange((AttackableUnit) args.Target))
+                if (!hero.IsInAutoAttackRange((AttackableUnit)args.Target))
                 {
                     desiredPath = hero.GetPath(args.Target.Position, true);
                 }
@@ -533,7 +612,7 @@ namespace EvadePlus
             {
                 if (LastEvadeResult != null && (!IsPointSafe(LastEvadeResult.EvadePoint) || LastEvadeResult.Expired()))
                 {
-                   // LastEvadeResult = null;
+                    // LastEvadeResult = null;
                 }
 
                 var evade = CalculateEvade(LastIssueOrderPos);
@@ -554,7 +633,7 @@ namespace EvadePlus
                     }
                 }
 
-                if (LastEvadeResult != null)
+                if (LastEvadeResult != null) //&& LastEvadeResult.EvadePoint.Distance(hero) > hero.HitBoxRadius()
                 {
                     var isPathSafe = IsHeroPathSafe(evade, desiredPath);
 
@@ -564,7 +643,7 @@ namespace EvadePlus
                         MoveTo(LastEvadeResult.WalkPoint, false);
                     }
 
-                    return true;  //desiredPath == null || !isPathSafe;
+                    return true; 
                 }
             }
             else if (!IsPathSafe(hero.RealPath()) || (desiredPath != null && !IsPathSafe(desiredPath)))
@@ -616,8 +695,9 @@ namespace EvadePlus
             {
                 get
                 {
-                    var walkPoint = EvadePoint.Extend(PlayerPos, -60);
+                    var walkPoint = EvadePoint.Extend(PlayerPos, -80);
                     var newPoint = walkPoint.Extend(PlayerPos, -ExtraRange);
+                   
                     if (Evade.IsPointSafe(newPoint))
                     {
                         return newPoint.To3DWorld();
@@ -645,7 +725,7 @@ namespace EvadePlus
                 if (Evade.ExtraEvadeRange > 0)
                 {
                     ExtraRange = (Evade.RandomizeExtraEvadeRange
-                        ? Utils.Random.Next(Evade.ExtraEvadeRange/3, Evade.ExtraEvadeRange)
+                        ? Utils.Random.Next(Evade.ExtraEvadeRange / 3, Evade.ExtraEvadeRange)
                         : Evade.ExtraEvadeRange);
                 }
             }

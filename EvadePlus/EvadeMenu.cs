@@ -12,10 +12,9 @@ namespace EvadePlus
         public static Menu SkillshotMenu { get; private set; }
         public static Menu SpellMenu { get; private set; }
         public static Menu DrawMenu { get; private set; }
-        public static Menu ControlsMenu { get; private set; }
+        public static Menu HotkeysMenu { get; private set; }
 
-        public static readonly Dictionary<string, EvadeSkillshot> MenuSkillshots =
-            new Dictionary<string, EvadeSkillshot>();
+        public static readonly Dictionary<string, EvadeSkillshot> MenuSkillshots = new Dictionary<string, EvadeSkillshot>();
 
         public static void CreateMenu()
         {
@@ -29,18 +28,34 @@ namespace EvadePlus
             // Set up main menu
             MainMenu.AddGroupLabel("General Settings");
             MainMenu.Add("fowDetection", new CheckBox("Enable FOW detection"));
+            MainMenu.AddLabel("On: for dodging through fog of war, Off: for more human behaviour");
+            MainMenu.AddSeparator(3);
+
             MainMenu.Add("processSpellDetection", new CheckBox("Enable Process Spell Detection"));
+            MainMenu.AddLabel("skillshot detection before the missile is created, recommended: On");
+            MainMenu.AddSeparator(3);
+
             MainMenu.Add("limitDetectionRange", new CheckBox("Limit Spell Detection Range"));
+            MainMenu.AddLabel("detect only skillshots near you, recommended: On");
+            MainMenu.AddSeparator(3);
+
             MainMenu.Add("recalculatePosition", new CheckBox("Allow recalculation of evade position", false));
+            MainMenu.AddLabel("allow change of evading path, recommended: Off");
+            MainMenu.AddSeparator(3);
+
             MainMenu.Add("moveToInitialPosition", new CheckBox("Move to desired position after evade.", false));
-            MainMenu.Add("serverTimeBuffer", new Slider("Server Time Buffer", 30));
-            MainMenu.AddSeparator();
+            MainMenu.AddLabel("move to your desired location after evading");
+            MainMenu.AddSeparator(3);
+
+            MainMenu.Add("serverTimeBuffer", new Slider("Server Time Buffer", 0, 0, 200));
+            MainMenu.AddLabel("the extra time it is included during evade calculation");
             MainMenu.AddSeparator();
 
             MainMenu.AddGroupLabel("Humanizer");
-            MainMenu.Add("skillshotActivationDelay", new Slider("Skillshot Activation Delay", 0, 0, 400));
+            MainMenu.Add("skillshotActivationDelay", new Slider("Evade delay", 0, 0, 400));
             MainMenu.AddSeparator(10);
-            MainMenu.Add("extraEvadeRange", new Slider("Extra Evade Range", 50, 0, 100));
+
+            MainMenu.Add("extraEvadeRange", new Slider("Extra Evade Range", 0, 0, 300));
             MainMenu.Add("randomizeExtraEvadeRange", new CheckBox("Randomize Extra Evade Range", false));
 
             // Set up skillshot menu
@@ -89,7 +104,7 @@ namespace EvadePlus
             }
 
             // Set up spell menu
-            SpellMenu = MainMenu.AddSubMenu("Spells");
+            SpellMenu = MainMenu.AddSubMenu("Evading Spells");
             SpellMenu.AddGroupLabel("Flash");
             SpellMenu.Add("flash", new Slider("Danger Value", 5, 0, 5));
 
@@ -104,10 +119,10 @@ namespace EvadePlus
             DrawMenu.Add("drawPath", new CheckBox("Draw Autpathing Path"));
 
             // Set up controls menu
-            ControlsMenu = MainMenu.AddSubMenu("Controls");
-            ControlsMenu.AddGroupLabel("Controls");
-            ControlsMenu.Add("enableEvade", new KeyBind("Enable Evade", true, KeyBind.BindTypes.PressToggle, 'M'));
-            ControlsMenu.Add("dodgeOnlyDangerous", new KeyBind("Dodge Only Dangerous", false, KeyBind.BindTypes.HoldActive));
+            HotkeysMenu = MainMenu.AddSubMenu("Hotkeys");
+            HotkeysMenu.AddGroupLabel("Hotkeys");
+            HotkeysMenu.Add("enableEvade", new KeyBind("Enable Evade", true, KeyBind.BindTypes.PressToggle, 'M'));
+            HotkeysMenu.Add("dodgeOnlyDangerous", new KeyBind("Dodge Only Dangerous", false, KeyBind.BindTypes.HoldActive));
         }
 
         private static EvadeSkillshot GetSkillshot(string s)
