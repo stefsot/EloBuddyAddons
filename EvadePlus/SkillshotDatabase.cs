@@ -3076,7 +3076,7 @@ namespace EvadePlus
                         MissileSpellName = "GravesQLineMis"
                     }
                 },
-		new LinearMissileSkillshot
+				new LinearMissileSkillshot
                 {
                     SpellData = new SpellData
                     {
@@ -3093,6 +3093,41 @@ namespace EvadePlus
                         MissileSpellName = "PoppyQ"
                     }
                 },
+				new LinearMissileSkillshot
+                {
+                    SpellData = new SpellData
+                    {
+                        DisplayName = "Deadly Flourish",
+                        ChampionName = "Jhin",
+                        SpellName = "JhinW",
+                        Slot = SpellSlot.W,
+                        Delay = 250,
+                        Range = 3000,
+                        Radius = 40,
+                        MissileSpeed = 5000,
+                        DangerValue = 2,
+                        IsDangerous = false,
+                        MissileSpellName = "JhinWMissile"
+                    }
+                },
+				new LinearMissileSkillshot
+                {
+                    SpellData = new SpellData
+                    {
+                        DisplayName = "Curtain Call",
+                        ChampionName = "Jhin",
+                        SpellName = "JhinRShot",
+                        Slot = SpellSlot.R,
+                        Delay = 250,
+                        Range = 3500,
+                        Radius = 80,
+                        MissileSpeed = 5000,
+                        DangerValue = 2,
+                        IsDangerous = false,
+                        MissileSpellName = "JhinRShotMis"
+                    }
+                },
+				
             };
         }
     }
