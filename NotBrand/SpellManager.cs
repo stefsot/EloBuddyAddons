@@ -16,7 +16,7 @@ namespace NotBrand
 
         static SpellManager()
         {
-            Q = new Spell.Skillshot(SpellSlot.Q, 1100, SkillShotType.Linear, 250, 1600, 120);
+            Q = new Spell.Skillshot(SpellSlot.Q, 1100, SkillShotType.Linear, 250, 1600, 60);
             W = new Spell.Skillshot(SpellSlot.W, 900, SkillShotType.Circular, 850, -1, 250);
             E = new Spell.Targeted(SpellSlot.E, 640);
             R = new Spell.Targeted(SpellSlot.R, 750);
