@@ -2801,14 +2801,30 @@ namespace EvadePlus
                     {
                         DisplayName = "Steel Tempest (tornado)",
                         ChampionName = "Yasuo",
-                        SpellName = "yasuoq3w",
+                        SpellName = "YasuoQ3/disabled",
                         Slot = SpellSlot.Q,
                         Delay = 400,
                         Range = 1150,
                         Radius = 90,
                         MissileSpeed = 1500,
                         DangerValue = 3,
-                        MissileSpellName = "yasuoq3w"
+                        MissileSpellName = "YasuoQ3Mis"
+                    }
+                },             
+                new YasuoQ
+                {
+                    SpellData = new SpellData
+                    {
+                        DisplayName = "Steel Tempest (tornado)",
+                        ChampionName = "Yasuo",
+                        SpellName = "YasuoQ3",
+                        Slot = SpellSlot.Q,
+                        Delay = 100,
+                        Range = 1150,
+                        Radius = 90,
+                        MissileSpeed = 1500,
+                        DangerValue = 3,
+                        MissileSpellName = "YasuoQ3Mis/disabled"
                     }
                 },
                 new YasuoQ
@@ -2817,7 +2833,7 @@ namespace EvadePlus
                     {
                         DisplayName = "Steel Tempest 1",
                         ChampionName = "Yasuo",
-                        SpellName = "yasuoq",
+                        SpellName = "YasuoQ",
                         Slot = SpellSlot.Q,
                         Delay = 400,
                         Range = 550,
@@ -2834,7 +2850,7 @@ namespace EvadePlus
                     {
                         DisplayName = "Steel Tempest 2",
                         ChampionName = "Yasuo",
-                        SpellName = "yasuoq2",
+                        SpellName = "YasuoQ2",
                         Slot = SpellSlot.Q,
                         Delay = 400,
                         Range = 550,
@@ -3026,23 +3042,23 @@ namespace EvadePlus
                     }
                 },
                 new LinearMissileSkillshot
-                 {
-                     SpellData = new SpellData
-                     {
-                         DisplayName = "Tentacle Smash",
-                         ChampionName = "Illaoi",
-                         SpellName = "IllaoiQ",
-                         Slot = SpellSlot.Q,
-                         Delay = 750,
-                         Range = 850,
-                         Radius = 100,
-                         MissileSpeed = 0,
-                         DangerValue = 3,
-                         IsDangerous = true,
-                         MissileSpellName = "illaoiemis"
-                     }
-                 },
-				new LinearMissileSkillshot
+                {
+                    SpellData = new SpellData
+                    {
+                        DisplayName = "Tentacle Smash",
+                        ChampionName = "Illaoi",
+                        SpellName = "IllaoiQ",
+                        Slot = SpellSlot.Q,
+                        Delay = 750,
+                        Range = 850,
+                        Radius = 100,
+                        MissileSpeed = 0,
+                        DangerValue = 3,
+                        IsDangerous = true,
+                        MissileSpellName = "illaoiemis"
+                    }
+                },
+                new LinearMissileSkillshot
                 {
                     SpellData = new SpellData
                     {
@@ -3076,7 +3092,7 @@ namespace EvadePlus
                         MissileSpellName = "GravesQLineMis"
                     }
                 },
-				new LinearMissileSkillshot
+                new LinearMissileSkillshot
                 {
                     SpellData = new SpellData
                     {
@@ -3093,7 +3109,7 @@ namespace EvadePlus
                         MissileSpellName = "PoppyQ"
                     }
                 },
-				new LinearMissileSkillshot
+                new LinearMissileSkillshot
                 {
                     SpellData = new SpellData
                     {
@@ -3110,7 +3126,7 @@ namespace EvadePlus
                         MissileSpellName = "JhinWMissile"
                     }
                 },
-				new LinearMissileSkillshot
+                new LinearMissileSkillshot
                 {
                     SpellData = new SpellData
                     {
@@ -3127,7 +3143,6 @@ namespace EvadePlus
                         MissileSpellName = "JhinRShotMis"
                     }
                 },
-				
             };
         }
     }
