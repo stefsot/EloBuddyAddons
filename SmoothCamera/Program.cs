@@ -43,6 +43,11 @@ namespace SmoothCamera
         private static void OnLoadingComplete(EventArgs args)
         {
             Menu = MainMenu.AddMenu("Smooth Camera", "smooth camera");
+
+            Menu.Add("keyBindOnly", new CheckBox("Use only with keybind", false));
+            Menu.Add("keyBind", new KeyBind("Hold keybind", false, KeyBind.BindTypes.HoldActive));
+            Menu.AddSeparator(1);
+
             Menu.Add("lockCamera", new CheckBox("Lock Camera", false));
             Menu.AddSeparator(1);
             Menu.Add("allowNavigation", new CheckBox("Allow camera navigation"));
@@ -88,6 +93,11 @@ namespace SmoothCamera
         private static void OnTick(EventArgs args)
         {
             if (Game.Mode != GameMode.Running)
+            {
+                return;
+            }
+
+            if (Menu["keyBindOnly"].Cast<CheckBox>().CurrentValue && !Menu["keyBind"].Cast<KeyBind>().CurrentValue)
             {
                 return;
             }
@@ -152,8 +162,7 @@ namespace SmoothCamera
 
         internal static void CameraSetTo(Vector2 point)
         {
-            Camera.CameraX = point.X;
-            Camera.CameraY = point.Y;
+            CameraPos = point;
         }
 
         internal static bool IsOnScreenBounds(Vector2 point, int tolerance = 10)
