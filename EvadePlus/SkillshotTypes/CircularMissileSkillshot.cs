@@ -2,7 +2,6 @@
 using System.Text.RegularExpressions;
 using EloBuddy;
 using EloBuddy.SDK;
-using EloBuddy.SDK.Rendering;
 using SharpDX;
 using Color = System.Drawing.Color;
 
@@ -29,10 +28,8 @@ namespace EvadePlus.SkillshotTypes
             get { return SpawnObject as MissileClient; }
         }
 
-        private bool MissileDeleted;
-        private Vector3 StartMissilePos;
-        private Circle PrimaryCircle;
-        private Circle SecondaryCircle;
+        private bool _missileDeleted;
+        private Vector3 _startMissilePos;
 
         public override Vector3 GetPosition()
         {
@@ -41,7 +38,7 @@ namespace EvadePlus.SkillshotTypes
 
         public override EvadeSkillshot NewInstance()
         {
-            var newInstance = new CircularMissileSkillshot() {SpellData = SpellData};
+            var newInstance = new CircularMissileSkillshot { SpellData = SpellData };
             return newInstance;
         }
 
@@ -54,21 +51,8 @@ namespace EvadePlus.SkillshotTypes
             else
             {
                 Position = Missile.EndPosition;
-                StartMissilePos = Missile.Position;
+                _startMissilePos = Missile.Position;
             }
-
-            PrimaryCircle = new Circle
-            {
-                Radius = SpellData.Radius,
-                BorderWidth = 3,
-                Color = Color.White
-            };
-
-            SecondaryCircle = new Circle
-            {
-                Radius = 10,
-                Color = Color.LawnGreen
-            };
         }
 
         public override void OnCreateObject(GameObject obj)
@@ -89,7 +73,7 @@ namespace EvadePlus.SkillshotTypes
         {
             if (Missile != null && obj.Index == Missile.Index && !string.IsNullOrEmpty(SpellData.ToggleParticleName))
             {
-                MissileDeleted = true;
+                _missileDeleted = true;
                 return false;
             }
 
@@ -98,10 +82,10 @@ namespace EvadePlus.SkillshotTypes
 
         public override void OnDeleteObject(GameObject obj)
         {
-            if (Missile != null && MissileDeleted && !string.IsNullOrEmpty(SpellData.ToggleParticleName))
+            if (Missile != null && _missileDeleted && !string.IsNullOrEmpty(SpellData.ToggleParticleName))
             {
                 var r = new Regex(SpellData.ToggleParticleName);
-                if (r.Match(obj.Name).Success && obj.Distance(Position, true) <= 100*100)
+                if (r.Match(obj.Name).Success && obj.Distance(Position, true) <= 100 * 100)
                 {
                     IsValid = false;
                 }
@@ -129,20 +113,22 @@ namespace EvadePlus.SkillshotTypes
                 return;
             }
 
-            if (Missile != null && !MissileDeleted)
+            if (Missile != null && !_missileDeleted)
             {
-                SecondaryCircle.Radius = StartMissilePos.To2D().Distance(Missile.Position.To2D())/
-                                         (StartMissilePos.To2D().Distance(Position.To2D()))*SpellData.Radius;
-                SecondaryCircle.Draw(Position);
+                new Geometry.Polygon.Circle(Position,
+                    _startMissilePos.To2D().Distance(Missile.Position.To2D()) / (_startMissilePos.To2D().Distance(Position.To2D())) * SpellData.Radius).DrawPolygon(
+                        Color.LawnGreen);
             }
 
-            PrimaryCircle.Draw(Position);
+            ToPolygon().DrawPolygon(Color.White);
         }
 
         public override Geometry.Polygon ToPolygon(float extrawidth = 0)
         {
             if (SpellData.AddHitbox)
+            {
                 extrawidth += Player.Instance.HitBoxRadius();
+            }
 
             return new Geometry.Polygon.Circle(Position, SpellData.Radius + extrawidth);
         }
@@ -157,9 +143,9 @@ namespace EvadePlus.SkillshotTypes
                          (Caster.Position.To2D().Distance(Position.To2D())) / SpellData.MissileSpeed * 1000);
             }
 
-            if (!MissileDeleted)
+            if (!_missileDeleted)
             {
-                return (int) ((Missile.Position.To2D().Distance(Position.To2D()))/SpellData.MissileSpeed*1000);
+                return (int) ((Missile.Position.To2D().Distance(Position.To2D())) / SpellData.MissileSpeed * 1000);
             }
 
             return -1;

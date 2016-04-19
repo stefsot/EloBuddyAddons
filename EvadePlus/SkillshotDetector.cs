@@ -197,7 +197,7 @@ namespace EvadePlus
                     var nSkillshot = skillshot.NewInstance();
                     nSkillshot.SkillshotDetector = this;
                     nSkillshot.SpawnObject = sender;
-                    nSkillshot.Team = Utils.GetTeam(sender);
+                    nSkillshot.Team = Utils.GetGameObjectTeam(sender);
                     nSkillshot.OnCreate(sender);
 
                     if (IsValidTeam(nSkillshot.Team) && (EnableFoWDetection || !nSkillshot.IsFromFow()))

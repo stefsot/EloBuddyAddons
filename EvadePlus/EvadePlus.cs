@@ -273,7 +273,7 @@ namespace EvadePlus
             {
                 foreach (var pol in Geometry.ClipPolygons(SkillshotDetector.ActiveSkillshots.Select(c => c.ToPolygon())).ToPolygons())
                 {
-                    pol.DrawPolygon(Color.Red, 2);
+                    pol.DrawPolygon(Color.White, 3);
                 }
             }
 

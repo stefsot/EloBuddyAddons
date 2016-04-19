@@ -36,10 +36,7 @@ namespace EvadePlus.SkillshotTypes
                 {
                     return _startPos;
                 }
-                else
-                {
-                    return Missile.Position;
-                }
+                return Missile.Position;
             }
         }
 
@@ -51,10 +48,7 @@ namespace EvadePlus.SkillshotTypes
                 {
                     return _endPos;
                 }
-                else
-                {
-                    return Missile.StartPosition.ExtendVector3(Missile.EndPosition, SpellData.Range);
-                }
+                return Missile.StartPosition.ExtendVector3(Missile.EndPosition, SpellData.Range);
             }
         }
 
@@ -65,7 +59,7 @@ namespace EvadePlus.SkillshotTypes
 
         public override EvadeSkillshot NewInstance()
         {
-            var newInstance = new LinearMissileSkillshot() {SpellData = SpellData};
+            var newInstance = new LinearMissileSkillshot { SpellData = SpellData };
             return newInstance;
         }
 
@@ -115,10 +109,11 @@ namespace EvadePlus.SkillshotTypes
         public override Geometry.Polygon ToPolygon(float extrawidth = 0)
         {
             if (SpellData.AddHitbox)
+            {
                 extrawidth += Player.Instance.HitBoxRadius();
+            }
 
-            return new Geometry.Polygon.Rectangle(StartPosition, EndPosition.ExtendVector3(StartPosition, -extrawidth),
-                SpellData.Radius*2 + extrawidth);
+            return new Geometry.Polygon.Rectangle(StartPosition, EndPosition.ExtendVector3(StartPosition, -extrawidth), SpellData.Radius * 2 + extrawidth);
         }
 
         public override int GetAvailableTime(Vector2 pos)
