@@ -4,7 +4,7 @@ namespace EvadePlus
 {
     internal static class Program
     {
-        public static bool DeveloperMode = true;
+        public static bool DeveloperMode = false;
 
         private static SkillshotDetector _skillshotDetector;
         private static EvadePlus _evade;
