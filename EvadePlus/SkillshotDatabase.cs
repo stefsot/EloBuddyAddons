@@ -307,7 +307,7 @@ namespace EvadePlus
                     {
                         DisplayName = "Sear",
                         ChampionName = "Brand",
-                        SpellName = "BrandBlaze",
+                        SpellName = "BrandQ",
                         Slot = SpellSlot.Q,
                         Delay = 250,
                         Range = 1100,
@@ -315,7 +315,7 @@ namespace EvadePlus
                         MissileSpeed = 1600,
                         DangerValue = 3,
                         IsDangerous = true,
-                        MissileSpellName = "BrandBlazeMissile"
+                        MissileSpellName = "BrandQMissile"
                     }
                 },
                 new CircularMissileSkillshot
@@ -324,7 +324,7 @@ namespace EvadePlus
                     {
                         DisplayName = "Pillar of Flame",
                         ChampionName = "Brand",
-                        SpellName = "BrandFissure",
+                        SpellName = "BrandW",
                         Slot = SpellSlot.W,
                         Delay = 850,
                         Range = 1100,
@@ -424,7 +424,7 @@ namespace EvadePlus
                     {
                         DisplayName = "Noxious Blast",
                         ChampionName = "Cassiopeia",
-                        SpellName = "CassiopeiaNoxiousBlast",
+                        SpellName = "CassiopeiaQ",
                         Slot = SpellSlot.Q,
                         Delay = 825,
                         Range = 600,
@@ -432,7 +432,7 @@ namespace EvadePlus
                         MissileSpeed = 0,
                         DangerValue = 2,
                         IsDangerous = false,
-                        MissileSpellName = "CassiopeiaNoxiousBlast"
+                        MissileSpellName = "CassiopeiaQ"
                     }
                 },
                 //new CircularMissileSkillshot
@@ -2979,7 +2979,7 @@ namespace EvadePlus
                     {
                         DisplayName = "Grasping Roots",
                         ChampionName = "Zyra",
-                        SpellName = "ZyraGraspingRoots",
+                        SpellName = "ZyraE",
                         Slot = SpellSlot.E,
                         Delay = 250,
                         Range = 1150,
@@ -2987,7 +2987,7 @@ namespace EvadePlus
                         MissileSpeed = 1150,
                         DangerValue = 3,
                         IsDangerous = true,
-                        MissileSpellName = "ZyraGraspingRoots"
+                        MissileSpellName = "ZyraEMissile"
                     }
                 },
                 new LinearMissileSkillshot
