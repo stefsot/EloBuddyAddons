@@ -28,7 +28,7 @@ namespace EvadePlus
 
         public bool DodgeDangerousOnly
         {
-            get { return EvadeMenu.HotkeysMenu["dodgeOnlyDangerous"].Cast<KeyBind>().CurrentValue; }
+            get { return EvadeMenu.HotkeysMenu["dodgeOnlyDangerous"].Cast<KeyBind>().CurrentValue || EvadeMenu.HotkeysMenu["dodgeOnlyDangeroustoggle"].Cast<KeyBind>().CurrentValue; }
         }
 
         public int ExtraEvadeRange

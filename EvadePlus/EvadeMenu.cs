@@ -123,6 +123,7 @@ namespace EvadePlus
             HotkeysMenu.AddGroupLabel("Hotkeys");
             HotkeysMenu.Add("enableEvade", new KeyBind("Enable Evade", true, KeyBind.BindTypes.PressToggle, 'M'));
             HotkeysMenu.Add("dodgeOnlyDangerous", new KeyBind("Dodge Only Dangerous", false, KeyBind.BindTypes.HoldActive));
+            HotkeysMenu.Add("dodgeOnlyDangeroustoggle", new KeyBind("Dodge Only Dangerous Toggle", false, KeyBind.BindTypes.PressToggle));
         }
 
         private static EvadeSkillshot GetSkillshot(string s)

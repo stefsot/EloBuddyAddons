@@ -2354,6 +2354,40 @@ namespace EvadePlus
                 {
                     SpellData = new SpellData
                     {
+                        DisplayName = "Taliyah Q",
+                        ChampionName = "Taliyah",
+                        SpellName = "TaliyahQ",
+                        Slot = SpellSlot.Q,
+                        Delay = 250,
+                        Range = 1000,
+                        Radius = 100,
+                        MissileSpeed = 3600,
+                        DangerValue = 2,
+                        IsDangerous = false,
+                        MissileSpellName = "TaliyahQMis"
+                    }
+                },
+                new CircularMissileSkillshot
+                {
+                    SpellData = new SpellData
+                    {
+                        DisplayName = "Taliyah W",
+                        ChampionName = "Taliyah",
+                        SpellName = "TaliyahW",
+                        Slot = SpellSlot.W,
+                        Delay = 600,
+                        Range = 900,
+                        Radius = 200,
+                        MissileSpeed = int.MaxValue,
+                        DangerValue = 3,
+                        IsDangerous = true,
+                        MissileSpellName = "TaliyahW"
+                    }
+                },
+                new LinearMissileSkillshot
+                {
+                    SpellData = new SpellData
+                    {
                         DisplayName = "Tongue Lash",
                         ChampionName = "TahmKench",
                         SpellName = "TahmKenchQ",
